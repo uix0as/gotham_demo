@@ -24,4 +24,4 @@ await mkdir(join(root, 'release'), { recursive: true });
 const destination = join(root, 'release', 'gotham_demo.zip');
 await writeFile(destination, zipSync(files, { level: 6 }));
 console.log(`학교 컴퓨터용 소스 ZIP: ${destination}`);
-console.log('.env, node_modules, DB 데이터, .git, 빌드 결과는 포함하지 않았습니다.');
+console.log('.env, node_modules, MySQL 원시 파일, .git, 빌드 결과는 제외합니다. sql 폴더의 학교용 SQL 백업은 포함됩니다.');

@@ -23,3 +23,6 @@ release/
 !/docs/PROJECT_OVERVIEW.md
 !/docs/PRESENTATION.md
 !/docs/example-analysis.csv
+
+# Database snapshot for the private school ZIP only.
+/sql/gotham_20612_backup.sql

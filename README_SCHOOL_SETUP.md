@@ -14,7 +14,13 @@ node --version
 npm --version
 ```
 
-ZIP에는 node_modules·dist·실제 .env·DB 파일이 없습니다. 개인 DB 데이터가 필요하면 별도 Workbench Export/Import를 사용합니다. 소스 ZIP은 개인 DB 백업이 아닙니다.
+GitHub에서 내려받은 소스에는 DB 백업이 없습니다. 이 경우2·3번에서 DB·계정을 준비하고, 4번은 건너뛰어5번의 스키마·시드를 실행합니다.
+
+이번 학교용 ZIP에는 현재 DB의 구조·데이터를 담은 `sql/gotham_20612_backup.sql`이 포함되어 있습니다. 회원2명·훈련 사건18건·분석 자료1,002건을 복원할 수 있습니다. node_modules·dist·실제.env·MySQL Server의 원시 데이터 파일은 포함하지 않습니다.
+
+**이번 ZIP은 2·3번으로 DB와 계정을 준비한 뒤, 4번 백업 복원을 진행하고 5번 시드는 건너뜁니다.** 그다음 6번.env 설정과7번 패키지 설치부터 계속합니다. 덤프를 복원했다면 공개 데이터 가져오기도 다시 실행할 필요가 없습니다.
+
+SQL 백업에는 웹 회원의 bcrypt 비밀번호 해시가 포함됩니다. 학교 PC 복원용으로 보관하며 공개 GitHub에는 포함하지 않습니다. MySQL20612 계정의 비밀번호와 JWT_SECRET은 덤프에 없으므로 학교에서 별도로 설정합니다.
 
 ## 2. MySQL Server와 관리자 연결
 
@@ -40,21 +46,54 @@ File → Open SQL Script로 `sql/admin-bootstrap.sql`을 엽니다. `REPLACE_WIT
 
 Test Connection 성공 후 이 연결에서 작업합니다. SCHEMAS의 gotham_20612를 더블 클릭해 기본 스키마로 선택합니다. 학교에서 다른 이름을 지정했다면 모든 연결과 server/.env의 DB_NAME을 동일하게 바꿉니다.
 
-## 4. 스키마 실행
+## 4. 현재 DB 백업 복원 — 이번 ZIP 권장 방법
 
-`sql/schema.sql`을 열고 전체 실행합니다. members·incidents·analysis_records 테이블과 `incidents.author_id → members.id` 외래키가 만들어집니다. CREATE TABLE IF NOT EXISTS를 사용하며 기존 행을 지우지 않습니다. 과거의 임의 스키마를 자동 변환하는 파일은 아닙니다.
+복원 파일: **sql/gotham_20612_backup.sql**. 스키마와 세 테이블의 데이터가 모두 들어 있습니다. 이번 백업은 gotham_20612를 대상으로 하므로 기본 DB 이름을 그대로 사용합니다.
 
-## 5. 시드 실행
-
-`sql/seed.sql`을 같은 스키마에서 전체 실행합니다. 가상 회원 2명·훈련 사건 18건입니다. 동일 시드를 다시 실행해도 기존 자료를 덮어쓰지 않습니다.
+1. Workbench의 학교 MySQL 관리자 연결을 엽니다. 앞의2번 admin-bootstrap.sql을 먼저 실행해 DB·20612 계정을 준비합니다.
+2. 새 SQL 탭에서 다음을 실행해 **테이블이 없는 빈 DB**인지 확인합니다.
 
 ```sql
-SELECT DATABASE(), @@hostname, @@port, CURRENT_USER();
-SELECT COUNT(*) FROM members;
-SELECT COUNT(*) FROM incidents;
+USE gotham_20612;
+SHOW TABLES;
 ```
 
-빈 DB에 적용한 직후 각각 2명·18건입니다. 기존 웹 데이터가 있다면 합계는 달라질 수 있습니다. 기본 시연 로그인은 alpha@demo.local / demo1234, bravo@demo.local / demo1234입니다.
+이미 테이블이나 데이터가 있으면 복원을 중단하고 기존 DB를 먼저 별도로 백업합니다. 이번 덤프는 기존 테이블을 DROP하지 않으며, 재실행하면 테이블/기본키 중복 오류가 날 수 있습니다. 이번 경로에서는 schema.sql과 seed.sql을 먼저 실행하지 않습니다.
+
+3. 상단 **Server → Data Import**를 엽니다.
+4. **Import from Self-Contained File**을 선택하고 압축을 푼 폴더의 `sql/gotham_20612_backup.sql`을 지정합니다.
+5. **Default Target Schema**를 `gotham_20612`로 선택합니다. 목록이 없으면 새로고침하고 앞의 DB 준비 단계를 확인합니다.
+6. **Start Import**를 누르고 Import Progress에서 오류 없이 완료됐는지 확인합니다.
+7. SCHEMAS를 새로고침합니다. members·incidents·analysis_records가 보여야 합니다.
+8. 앞의3번에서 만든 **20612 연결**을 열어 아래 SQL로 결과를 확인합니다.
+
+```sql
+USE gotham_20612;
+SELECT DATABASE() AS db, @@port AS port, CURRENT_USER() AS account;
+SELECT COUNT(*) AS members FROM members;                   -- 2
+SELECT COUNT(*) AS incidents FROM incidents;               -- 18
+SELECT COUNT(*) AS analysis_records FROM analysis_records; -- 1002
+
+SELECT i.id, i.title, i.status, m.username, m.email
+FROM incidents AS i
+INNER JOIN members AS m ON i.author_id = m.id
+ORDER BY i.occurred_at DESC, i.id DESC;
+```
+
+현재 웹 회원의 비밀번호 해시도 함께 복원되므로 기존 웹 로그인 비밀번호를 그대로 사용합니다. 기본 시연 계정은 alpha@demo.local / demo1234, bravo@demo.local / demo1234입니다. MySQL 접속 비밀번호는 웹 로그인 비밀번호와 별개입니다.
+
+이제 아래6번에서 server/.env를 학교 접속정보로 설정합니다. **5번 시드, db:init·db:seed·data:import는 다시 실행하지 않습니다.**
+
+Workbench 절차 참고: [공식 SQL Data Export and Import 안내](https://dev.mysql.com/doc/workbench/en/wb-admin-export-import-management.html). 백업 원본은 MySQL9.0.1에서 내보냈습니다. macOS의 별도 MySQL에 실제 복원하여 세 테이블의 전체 행 내용과 외래키 CASCADE가 원본과 일치하는 것을 확인했습니다. 실제 Windows 복원은 학교에서 확인해야 합니다.
+
+## 5. 백업 없이 새 데이터로 시작할 때만
+
+GitHub 소스처럼 백업 SQL이 없는 경우에 사용합니다. **4번에서 백업을 복원했다면 이 단계 전체를 건너뜁니다.**
+
+1. 빈 gotham_20612를 기본 스키마로 선택합니다.
+2. sql/schema.sql을 실행합니다. 세 테이블과 incidents.author_id → members.id 외래키가 생성됩니다.
+3. sql/seed.sql을 실행합니다. 가상 회원2명·훈련 사건18건이 추가됩니다.
+4. 공개 분석 자료는 뒤의 선택적 data:import 명령으로 가져옵니다.
 
 ## 6. server 환경설정
 
@@ -102,7 +141,7 @@ npm --prefix client ci
 
 진단 결과의 DB 이름·서버·포트·계정을 Workbench의 SELECT 결과와 비교합니다. API 시작 전에는 DB 연결 성공과 API 미확인이 함께 표시될 수 있습니다. DB 연결 실패는 해결한 후 진행합니다.
 
-Workbench 대신 Node로 같은 SQL을 초기화할 수도 있습니다. 두 방식을 중복 실행할 필요는 없습니다.
+백업 SQL을 복원하지 않은 경우에만, Workbench 대신 Node로 schema·seed를 초기화할 수도 있습니다. 4번에서 복원했다면 아래 두 명령은 실행하지 않습니다.
 
 ```powershell
 npm run db:init
@@ -169,7 +208,7 @@ ORDER BY i.occurred_at DESC, i.id DESC;
 
 ## 추가 분석 데이터와 문제 해결
 
-가상 사건 18건만으로 모든 필수 CRUD·JOIN을 시연할 수 있습니다. 공개 관측 자료는 선택 사항입니다.
+가상 사건18건만으로 모든 필수 CRUD·JOIN을 시연할 수 있습니다. 아래 가져오기는 백업 없이 새로 구성한 DB에서만 선택적으로 실행합니다. 이번 백업에는 공개 관측1,000건·합성 CSV2건이 이미 들어 있습니다.
 
 ```powershell
 npm run data:import -- --limit 1000

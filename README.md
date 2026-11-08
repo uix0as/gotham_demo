@@ -39,6 +39,8 @@ gotham_demo/
 
 Node.js 24 또는22.12 이상, npm, MySQL Server와 MySQL Workbench가 필요합니다. Windows의 DB 준비와 PowerShell 명령은 [학교 설치 안내](README_SCHOOL_SETUP.md)를 참고하세요.
 
+**현재 DB가 동봉된 학교용 ZIP이라면 [학교 설치 안내의4번](README_SCHOOL_SETUP.md)으로 복원합니다. 이 경우 아래 schema.sql·seed.sql 초기화는 건너뜁니다. GitHub 소스에는 개인 DB 백업이 포함되지 않습니다.**
+
 1. Workbench 관리자 연결에서 `sql/admin-bootstrap.sql`의 예시 비밀번호를 수정하고 실행합니다.
 2. `20612` 계정으로 연결해 `gotham_20612`를 기본 스키마로 선택합니다.
 3. `sql/schema.sql`, `sql/seed.sql`을 순서대로 실행합니다.
@@ -100,4 +102,4 @@ macOS에서 빌드·API·MySQL·압축 해제 후 설치를 검증했습니다. 
 
 웹과 Workbench는 같은 `gotham_20612`를 사용합니다. `sql/verify_connection.sql`과 `npm run diagnose`로 DB 이름·서버·포트·계정을 비교할 수 있습니다.
 
-`npm run package`는 `release/gotham_demo.zip`을 생성합니다. 실제 환경설정·의존성·빌드 결과·DB 파일은 제외합니다. 개인 DB를 옮길 때는 Workbench의 Data Export/Import를 별도로 사용합니다.
+`npm run package`는 `release/gotham_demo.zip`을 생성합니다. 실제 환경설정·의존성·빌드 결과·MySQL 원시 데이터 파일은 제외합니다. 로컬 sql/gotham_20612_backup.sql이 있으면 학교용 ZIP에 함께 넣습니다. 이 SQL 백업은 Git에서 제외하며, 복원 절차는 README_SCHOOL_SETUP.md에 있습니다.
