@@ -1,0 +1,25 @@
+**/node_modules/
+**/.env
+**/.env.*
+!**/.env.example
+**/dist/
+**/.next/
+**/out/
+**/*.tsbuildinfo
+*.log
+.DS_Store
+.runtime/
+release/
+.impeccable/
+.taste-skill/
+/DESIGN.md
+/PRODUCT.md
+
+# Publish the project documentation; keep local reviews and archives private.
+/docs/*
+!/docs/API_CONTRACT.md
+!/docs/DATABASE_SCHEMA.md
+!/docs/DATA_SOURCES.md
+!/docs/PROJECT_OVERVIEW.md
+!/docs/PRESENTATION.md
+!/docs/example-analysis.csv

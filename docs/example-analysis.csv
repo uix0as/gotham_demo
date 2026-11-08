@@ -1,0 +1,3 @@
+source_name,external_id,title,event_type,severity,sector,map_x,map_y,description,status,occurred_at,source_url,is_synthetic,dataset_url,source_license,contributor,latitude,longitude,magnitude
+교육용 합성 CSV,synthetic-001,"가상 센서 점검, A-2",장비 점검,보통,A-2,35,60,실제 관측이 아닌 학교 발표용 합성 분석 데이터입니다,접수,2026-11-08T14:20:00+09:00,https://example.org/synthetic-example,true,https://example.org/synthetic-example,이 프로젝트에서 만든 교육용 합성 예제,학생 예제,,,
+교육용 합성 CSV,synthetic-002,가상 통신 점검,통신 장애,높음,A-2,39,64,실제 관측이 아닌 학교 발표용 합성 분석 데이터입니다,검토 중,2026-11-08T14:30:00+09:00,https://example.org/synthetic-example,true,https://example.org/synthetic-example,이 프로젝트에서 만든 교육용 합성 예제,학생 예제,,,

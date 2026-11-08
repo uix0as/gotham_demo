@@ -1,0 +1,15 @@
+{
+  "source": "U.S. Geological Survey / contributing seismic networks",
+  "source_url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson",
+  "format_documentation": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php",
+  "terms_url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits",
+  "retrieved_at": "2026-11-08T04:08:21.986258+00:00",
+  "http_status": 200,
+  "feed_generated_ms": 1794110900000,
+  "feed_records": 9979,
+  "included_records": 1000,
+  "selection": "Latest 1000 features by properties.time",
+  "sha256": "66da9b4735d67d46450e251b8cd004baf07fa0cec0cedb78a0e311a031e57048",
+  "attribution": "Credit: U.S. Geological Survey and the net/source contributors identified in each event. USGS-produced data is public domain; third-party notices remain applicable.",
+  "is_synthetic": false
+}

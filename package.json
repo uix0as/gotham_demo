@@ -1,0 +1,29 @@
+{
+  "name": "gotham-20612",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dev:client": "npm --prefix client run dev",
+    "dev:server": "npm --prefix server run dev",
+    "dev:frontend": "npm --prefix client run dev",
+    "dev:backend": "npm --prefix server run dev",
+    "build": "npm --prefix client run build",
+    "lint": "npm --prefix client run lint",
+    "start": "npm --prefix server start",
+    "db:init": "npm --prefix server run db:init",
+    "db:seed": "npm --prefix server run seed",
+    "diagnose": "npm --prefix server run diagnose",
+    "data:import": "npm --prefix server run data:import --",
+    "test": "npm --prefix server test",
+    "package": "node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "fflate": "0.8.3"
+  }
+}
