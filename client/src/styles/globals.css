@@ -132,11 +132,7 @@ html[data-theme='dark'] {
 
 /* The shared metric strip leads into the two-column analytics view. */
 .operations-dashboard { display:flex; flex-direction:column; gap:16px; }
-.op-title-band { display:flex; align-items:center; gap:15px; min-height:84px; padding:18px 20px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); }
-.op-title-symbol { display:grid; place-items:center; width:44px; height:44px; flex:0 0 auto; border:1px solid var(--border); border-radius:50%; background:var(--sidebar); }
-.op-title-band h1 { font-size:20px; line-height:1.45; font-weight:650; letter-spacing:-.04em; }
-.op-title-band p { margin-top:4px; color:var(--text-muted); font-size:13px; }
-.op-title-controls { display:flex; align-items:center; gap:8px; margin-left:auto; }
+
 .op-connection { display:inline-flex; align-items:center; gap:5px; padding:3px 7px; border:1px solid var(--border); border-radius:5px; white-space:nowrap; font-size:11px; }
 .op-connection>i,.op-live-label>i { width:5px; height:5px; border-radius:50%; background:var(--teal); }
 .op-connection.is-pending>i { background:rgb(var(--warn-rgb)); }
@@ -348,8 +344,8 @@ html[data-theme='dark'] {
   .op-map-action { display:inline-flex; }.console-content { padding:20px; }.operations-chart { height:265px; }
 }
 @media (max-width:1399px) {
-  .op-title-band { flex-wrap:wrap; }.op-title-controls { flex:0 0 100%; margin-left:0; padding-left:59px; }
-  .op-title-controls .op-connection { margin-right:auto; }.op-map-action { display:inline-flex; }
+
+  .op-map-action { display:inline-flex; }
   .op-metric h2,.op-metric-body { padding-inline:16px; }.op-metric-body p { font-size:11px; }
   .tiny-line { width:54px; }.tiny-histogram { width:42px; }.op-record-tools { gap:10px; }
 }
@@ -371,7 +367,7 @@ html[data-theme='dark'] {
   .console-drawer-close,.console-mobile-menu { display:inline-flex; }.console-brand { justify-content:space-between; padding-inline:16px; }.console-desktop-menu { display:none; }
   .console-compact .console-logo>span,.console-compact .console-nav-label,.console-compact .console-nav-link>span,.console-compact .console-nav-link small,.console-compact .console-data-card,.console-compact .console-guide-link>span,.console-compact .console-user>div,.console-compact .console-user>.console-icon { display:revert; }
   .console-compact .console-nav-link,.console-compact .console-guide-link,.console-compact .console-user { justify-content:flex-start; padding-inline:10px; }
-  .op-title-controls { padding-left:0; }
+
 }
 @media (max-width:767px) {
   .console-toolbar { height:64px; gap:6px; padding-inline:12px; }.console-toolbar-divider,.console-search kbd,.console-refresh,.console-help { display:none; }
@@ -379,10 +375,9 @@ html[data-theme='dark'] {
   .console-utilities { gap:0; }.console-icon { min-width:44px; min-height:44px; }.console-profile { min-height:44px; margin-left:4px; }.console-profile>svg { display:none; }.console-avatar { width:30px; height:30px; }
   .console-notification-menu { position:fixed; top:60px; right:12px; width:min(340px,calc(100vw - 24px)); }
   .console-content { padding:14px; }.console-footer { flex-direction:column; align-items:flex-start; gap:8px; margin:14px 14px 0; padding:20px 0; }.console-footer>div { flex-wrap:wrap; gap:4px 16px; }.console-footer a,.console-footer button,.console-data-action { min-height:44px; }
-  .operations-dashboard { gap:14px; }.op-title-band { align-items:flex-start; gap:12px; padding:16px; }.op-title-symbol { width:38px; height:38px; }
-  .op-title-band>div:nth-child(2) { flex:1; min-width:0; }.op-title-band h1 { font-size:18px; }.op-title-band p { max-width:280px; font-size:12px; line-height:1.8; }
-  .op-title-controls { display:grid; grid-template-columns:1fr 1fr; gap:9px; padding-top:4px; }.op-title-controls .op-connection { justify-self:start; min-height:25px; align-self:center; margin:0; }.op-title-controls .op-select { grid-row:1; grid-column:2; }
-  .app-button,.nx-button { min-height:44px; }.op-select { min-height:46px; }.op-select select { min-height:44px; }.op-select select,.input { font-size:16px; }.op-title-controls .app-button { font-size:12px; padding-inline:8px; }
+  .operations-dashboard { gap:14px; }
+
+  .app-button,.nx-button { min-height:44px; }.op-select { min-height:46px; }.op-select select { min-height:44px; }.op-select select,.input { font-size:16px; }
   .op-metric h2 { min-height:44px; padding:11px 13px; font-size:12px; gap:6px; }.op-metric h2>svg { width:14px; height:14px; }
   .op-metric-body { min-height:109px; padding:19px 13px; gap:4px; }.op-metric-body strong { font-size:27px; }.op-metric-body strong>span { margin-left:3px; font-size:15px; }.op-metric-body p { margin-top:9px; font-size:10px; white-space:normal; }
   .tiny-histogram { width:30px; height:33px; gap:2px; }.tiny-line { width:32px; height:37px; }.completion-ring { width:36px; height:36px; }
@@ -404,7 +399,7 @@ html[data-theme='dark'] {
   .source-summary-grid,.source-notes { grid-template-columns:1fr; gap:14px; }.source-summary-grid>div { padding:20px; }.source-list article { flex-wrap:wrap; gap:12px; padding:20px 16px; }.source-list article>div { flex:1; min-width:170px; }.source-list h3 { flex-wrap:wrap; gap:5px; }.source-list article>strong { margin-left:57px; font-size:21px; }.source-list article>a { margin-left:auto; }
 }
 @media (max-width:374px) {
-  .console-toolbar { padding-inline:8px; gap:2px; }.console-utilities>.console-icon { display:none; }.console-content { padding:10px; }.op-title-band { padding:14px 12px; }.op-title-band h1 { font-size:16px; }.op-title-band p { font-size:11px; }.op-title-symbol { width:32px; height:32px; }
+  .console-toolbar { padding-inline:8px; gap:2px; }.console-utilities>.console-icon { display:none; }.console-content { padding:10px; }
   .op-metric-body { padding-inline:10px; }.op-metric-body strong { font-size:24px; }.tiny-histogram,.tiny-line { width:24px; }.completion-ring { width:30px; height:30px; }.op-caption { display:none; }.op-trend-summary { gap:14px; }.op-trend-summary strong { font-size:23px; }.op-trend-summary .op-select { padding-left:7px; }.op-trend-summary .op-select select { font-size:12px; }.op-card-heading h2 { font-size:13px; }.op-live-label { font-size:10px; }
 }
 @media (prefers-reduced-motion:reduce) {

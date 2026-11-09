@@ -1,0 +1,200 @@
+/* Align shared workspace surfaces; adapt grids to space left by the rail. */
+.console-content {
+  --section-gap: 24px;
+  --panel-gap: 20px;
+  --panel-inset: 20px;
+  container: workspace / inline-size;
+  padding: 24px;
+}
+.console-footer { margin-inline: 24px; }
+.operations-dashboard, .workspace-page { gap: var(--section-gap, 24px); }
+
+.page-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: var(--panel-inset, 20px);
+  margin-bottom: var(--section-gap, 24px);
+}
+.page-header-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.page-header-title h1 { min-width: 0; text-wrap: balance; }
+.page-header-actions { min-width: 0; flex-basis: auto; justify-content: flex-end; }
+.operations-dashboard > .page-header { margin-bottom: 0; }
+.page-header-copy > p { max-width: 65ch; line-height: 1.7; }
+.dashboard-header .op-connection { color: var(--text-secondary); }
+.dashboard-header .op-select { width: 160px; }
+.panel-header, .op-card-heading { min-height: 56px; padding-inline: var(--panel-inset, 20px); }
+.panel-body.p-5 { padding: var(--panel-inset, 20px); }
+.op-card-heading h2 { font-size: 14px; }
+.op-caption { display: inline; font-size: 11px; }
+
+/* Compact joined metrics keep the working data in the first viewport. */
+.op-metric-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.op-metric { min-width: 0; }
+.op-metric h2, .summary-metric h2 {
+  min-height: 44px;
+  padding: 12px var(--panel-inset);
+  font-size: 13px;
+}
+.op-metric-body, .summary-metric-body {
+  min-height: 88px;
+  padding: 16px var(--panel-inset);
+}
+.op-metric-body > div { min-width: 0; }
+.op-metric-body p, .summary-metric p { margin-top: 8px; font-size: 12px; white-space: normal; }
+.op-metric:nth-child(n) { border-top: 0; border-left: 1px solid var(--border); }
+.op-metric:first-child { border-left: 0; }
+.tiny-histogram { width: 44px; }
+.tiny-line { width: 56px; }
+.completion-ring { width: 44px; height: 44px; }
+
+/* Read the trend beside the work queue, then compare distributions. */
+.op-primary-grid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--panel-gap); }
+.op-insight-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--panel-gap); }
+.op-record-grid { grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr); gap: var(--panel-gap); }
+.op-trend-summary { gap: 28px; padding: 20px var(--panel-inset) 4px; }
+.operations-chart, .op-chart-loading { height: 244px; margin: 12px 16px; }
+.op-trend-card .operations-chart, .op-trend-card > .op-chart-loading { flex: 1; min-height: 224px; }
+.op-trend-footer, .op-public-footer, .op-card-footer-link {
+  min-height: 48px;
+  padding: 12px var(--panel-inset);
+}
+.op-pending-card { grid-column: auto; }
+.op-pending-list { display: flex; flex-direction: column; }
+.op-pending-list > button { flex: 1; min-height: 76px; padding: 16px var(--panel-inset); }
+.op-pending-list > button:last-child { border-bottom: 0; }
+.op-pending-list > button:nth-child(odd) { border-right: 0; }
+.op-card-footer-link { justify-content: space-between; }
+.op-pending-symbol { width: 32px; height: 32px; }
+.op-pending-list strong { font-size: 13px; }
+
+/* Match interior edges, chart density and legend rows across all three panels. */
+.op-public-total { padding: 20px var(--panel-inset) 0; }
+.op-public-total > strong { font-size: 30px; }
+.op-magnitude { padding: 20px var(--panel-inset); }
+.op-public-legend { gap: 0; }
+.op-public-legend > div { min-height: 32px; }
+.op-public-footer a { display: grid; place-items: center; min-width: 28px; min-height: 28px; }
+.status-gauge { width: 200px; height: 200px; margin-top: 20px; }
+.op-status-legend { margin-top: auto; padding: 12px var(--panel-inset) 16px; }
+.op-status-legend button { min-height: 36px; padding-inline: 0; }
+.op-sector-summary { padding: 20px var(--panel-inset) 0; }
+.sector-columns { gap: 12px; padding: 20px var(--panel-inset) 12px; }
+.sector-column-stack { height: 120px; }
+.sector-column-legend { gap: 0 20px; padding: 4px var(--panel-inset) 16px; }
+.sector-column-legend button { min-height: 36px; }
+
+/* Give inspectable records the larger column and consistent control sizing. */
+.op-record-tools { gap: 12px; padding: 16px var(--panel-inset); }
+.op-record-tabs button { min-height: 30px; padding-inline: 8px; font-size: 12px; }
+.op-record-tabs button > span { font-size: 11px; }
+.op-record-filters { min-width: 250px; gap: 8px; }
+.op-record-search { max-width: 200px; }
+.op-record-search input, .op-record-status select { font-size: 13px; }
+.op-record-table th { font-size: 12px; }
+.op-record-table th:first-child, .op-record-table td:first-child { padding-left: var(--panel-inset); }
+.op-record-table td { padding-block: 14px; }
+.op-pagination { padding-inline: var(--panel-inset); }
+.op-type-overview { padding: 20px var(--panel-inset) 0; }
+.op-type-stack { margin: 16px var(--panel-inset); }
+.op-type-list { display: flex; flex: 1; flex-direction: column; padding: 0 var(--panel-inset) 12px; }
+.op-type-list button { flex: 1; min-height: 72px; }
+.op-type-list strong { overflow-wrap: anywhere; }
+.op-type-list button > span:last-child { white-space: nowrap; }
+.op-provenance { align-items: baseline; }
+
+@container workspace (max-width: 64rem) {
+  .dashboard-header .page-header-actions { grid-column: 1 / -1; width: 100%; margin: 0; }
+  .dashboard-header .op-select { width: auto; min-width: 160px; max-width: 280px; margin-right: auto; }
+  .op-record-grid { grid-template-columns: minmax(0, 1fr); }
+  .op-type-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; }
+}
+
+@container workspace (max-width: 60rem) {
+  .op-insight-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .op-observation-card {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.7fr);
+  }
+  .op-observation-card .op-card-heading, .op-public-footer { grid-column: 1 / -1; }
+  .op-observation-card .op-magnitude { padding-block: 20px; }
+  .op-observation-card .op-public-total { padding-bottom: 20px; }
+}
+
+@container workspace (max-width: 54rem) {
+  .op-metric-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .op-metric:nth-child(3) { border-left: 0; }
+  .op-metric:nth-child(n+3) { border-top: 1px solid var(--border); }
+  .op-primary-grid { grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); }
+  .op-trend-summary { gap: 20px; }
+  .op-card-heading { gap: 8px; }
+  .op-trend-card .op-caption { display: none; }
+}
+
+@container workspace (max-width: 44rem) {
+  .page-header { grid-template-columns: auto minmax(0, 1fr); }
+  .page-header-actions { grid-column: 1 / -1; width: 100%; justify-content: flex-start; margin: 0; }
+  .page-header-title h1 { font-size: 18px; }
+  .op-primary-grid, .op-insight-grid, .op-record-grid { grid-template-columns: minmax(0, 1fr); }
+  .op-pending-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .op-pending-list > button:nth-child(odd) { border-right: 1px solid var(--border); }
+  .op-pending-list > button:nth-last-child(-n+2) { border-bottom: 0; }
+  .op-observation-card { display: flex; grid-column: auto; }
+  .op-observation-card .op-magnitude { padding-top: 0; }
+  .op-record-tools { align-items: stretch; }
+  .op-record-tabs { width: 100%; }
+  .op-record-tabs button { flex: 1; }
+  .op-record-filters { width: 100%; min-width: 0; }
+  .op-record-search { max-width: none; }
+}
+
+@media (max-width: 767px) {
+  .console-content { --section-gap: 20px; --panel-gap: 16px; --panel-inset: 16px; padding: 16px; }
+  .console-footer { margin-inline: 16px; }
+  .page-header { gap: 12px; }
+  .page-header-symbol { width: 38px; height: 38px; }
+  .page-header-copy > p { font-size: 12px; }
+  .page-header-actions > .app-button { flex: 1; }
+  .dashboard-header .page-header-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .dashboard-header .op-select { grid-column: 1 / -1; max-width: none; margin: 0; }
+  .op-metric h2, .summary-metric h2 { gap: 6px; padding: 12px; font-size: 12px; }
+  .op-metric-body, .summary-metric-body { padding: 16px 12px; }
+  .op-metric-body strong { font-size: 27px; }
+  .op-metric-body p { font-size: 11px; }
+  .tiny-histogram, .tiny-line { width: 30px; }
+  .completion-ring { width: 36px; height: 36px; }
+  .op-card-heading { padding-block: 16px; }
+  .op-card-heading h2 { font-size: 14px; }
+  .op-caption { font-size: 11px; }
+  .op-trend-summary { flex-wrap: wrap; gap: 16px 24px; }
+  .op-trend-summary .op-select { margin-left: auto; }
+  .operations-chart, .op-chart-loading { height: 224px; margin-inline: 8px; }
+  .op-pending-list { display: flex; }
+  .op-pending-list > button:nth-child(odd) { border-right: 0; }
+  .op-pending-list > button { min-height: 80px; }
+  .op-pending-list > button:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .op-public-footer a, .op-status-legend button, .sector-column-legend button { min-height: 44px; }
+  .op-public-footer a { min-width: 44px; }
+  .op-record-tabs button { min-height: 44px; padding-inline: 6px; }
+  .op-record-search input, .op-record-status select { font-size: 16px; }
+  .op-type-list { display: flex; }
+  .op-record-table td { padding: 0; }
+  .op-record-table td:first-child { padding-left: 0; }
+  .op-provenance { align-items: flex-start; }
+}
+
+@media (max-width: 419px) {
+  .console-content { padding: 12px; }
+  .console-footer { margin-inline: 12px; }
+  .tiny-histogram, .tiny-line, .completion-ring { display: none; }
+  .page-header-title h1 { font-size: 17px; }
+  .op-trend-summary { gap: 12px 20px; }
+  .op-trend-summary > .op-select { flex: 0 0 100%; }
+  .op-trend-summary strong { font-size: 27px; }
+}
+
+.page-header h1, .panel-title, .op-card-heading h2 { letter-spacing: 0; }
+.op-metric-body strong { font-weight: 600; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.op-metric-body .op-positive { color: var(--text-secondary); }

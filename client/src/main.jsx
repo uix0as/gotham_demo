@@ -5,6 +5,7 @@ import '@fontsource-variable/geist';
 import '@fontsource-variable/noto-sans-kr';
 import './styles/globals.css';
 import './styles/workspace.css';
+import './styles/layout.css';
 import App from './App';
 import { Providers } from './context/Providers';
 

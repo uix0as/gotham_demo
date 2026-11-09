@@ -1,0 +1,14 @@
+Third-party notices
+
+Unslop
+Author: Damir Sokolovsky (@heydamir)
+Source: https://heydamir.design/unslop
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+
+The design guidance was used to refine spacing, typography and statistic-card
+presentation. The application's existing identity and functionality were retained.
+No reference images or story templates are included.
+
+Public observation data and its source credits are documented in
+/docs/DATA_SOURCES.md and /data/usgs-source.json in the source project.
