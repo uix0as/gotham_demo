@@ -30,6 +30,14 @@ const rows = [
   ['강풍 관측', 'A-2', '가상 기상센서', 50, 84, '높음', '접수', '15:20', '가상 WX-14 풍속 관측 지속. 모의 훈련로 이동 주의 안내.'],
 ];
 
+// 분석 기록: [작성자 이메일, 대상 사건 제목, 제목, 판단, 신뢰도, 내용]
+const notes = [
+  ["alpha@demo.local", "[가상 훈련 02] A-2 강풍 관측", "A-2 통신 장애와 강풍의 시간 근접", "주의", "보통", "통신 장애(14:20) 5분 뒤 같은 구역에서 강풍이 관측됨. 임시 안테나 고정 상태 확인 필요. 인과관계는 확인되지 않음."],
+  ["bravo@demo.local", "[가상 훈련 01] A-2 통신 장애", "중계기 R-07 장애 원인 후보", "관찰", "낮음", "장비 자체 결함과 기상 영향 두 가지 후보. 예비 중계기 전환(15:05) 이후 복구된 점으로 보아 일시적 장애 가능성."],
+  ["alpha@demo.local", "[가상 훈련 03] B-1 전원 이상", "B-1 발전기 출력 변동 재발 위험", "위험", "높음", "PG-2 출력 변동 후 22분 뒤 점검 착수. 연료 필터 교체 전까지 재발 가능성이 높음. 예비 전원 유지 권고."],
+  ["bravo@demo.local", "[가상 훈련 12] B-2 레이더 신호 감쇠", "B-2 레이더 잡음과 돌풍", "주의", "보통", "RD-2 잡음 증가 8분 뒤 돌풍 관측. 회전부 점검 결과를 받은 뒤 상태 재평가."],
+];
+
 try {
   requireDatabaseSettings();
   const ids = [];
@@ -59,7 +67,20 @@ try {
     );
     inserted += 1;
   }
-  console.log(`시연 데이터 준비 완료: 회원 2개 확인, 사건 ${inserted}개 새로 추가. 기존 데이터와 비밀번호 유지.`);
+  let insertedNotes = 0;
+  for (const [email, incidentTitle, title, assessment, confidence, content] of notes) {
+    const authorId = ids[accounts.findIndex((account) => account.email === email)];
+    const [[incident]] = await pool.execute('SELECT id FROM incidents WHERE title = ? ORDER BY id LIMIT 1', [incidentTitle]);
+    if (!incident) continue;
+    const [existing] = await pool.execute('SELECT id FROM analysis_notes WHERE author_id = ? AND title = ? LIMIT 1', [authorId, title]);
+    if (existing.length) continue;
+    await pool.execute(
+      'INSERT INTO analysis_notes (incident_id, author_id, title, assessment, confidence, content) VALUES (?, ?, ?, ?, ?, ?)',
+      [incident.id, authorId, title, assessment, confidence, content],
+    );
+    insertedNotes += 1;
+  }
+  console.log(`시연 데이터 준비 완료: 회원 2개 확인, 사건 ${inserted}개·분석 기록 ${insertedNotes}개 새로 추가. 기존 데이터와 비밀번호 유지.`);
   console.log('시연 로그인: alpha@demo.local / bravo@demo.local, 최초 비밀번호: demo1234');
 } catch (error) {
   console.error(error.code ? `시드 실패 (${error.code}). DB 초기화 및 접속 설정을 확인하세요.` : error.message);

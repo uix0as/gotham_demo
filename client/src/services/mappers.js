@@ -62,5 +62,28 @@ export function toEvent(raw) {
     };
 }
 export function toEventWithAuthor(raw) {
-    return { ...toEvent(raw), nickname: String(raw.nickname ?? raw.username ?? ''), username: String(raw.username ?? raw.nickname ?? ''), email: String(raw.email ?? '') };
+    return { ...toEvent(raw), nickname: String(raw.nickname ?? raw.username ?? ''), username: String(raw.username ?? raw.nickname ?? ''), email: String(raw.email ?? ''), ...(raw.member_created_at ? { member_created_at: normalizeDateTime(raw.member_created_at) } : {}) };
+}
+export function toNote(raw) {
+    return {
+        note_id: num(raw.note_id ?? raw.id),
+        incident_id: num(raw.incident_id),
+        member_id: num(raw.member_id ?? raw.author_id),
+        title: String(raw.title ?? ''),
+        assessment: String(raw.assessment ?? '관찰'),
+        confidence: String(raw.confidence ?? '보통'),
+        content: String(raw.content ?? ''),
+        nickname: String(raw.nickname ?? raw.username ?? ''),
+        email: String(raw.email ?? ''),
+        incident_title: String(raw.incident_title ?? ''),
+        incident_type: String(raw.incident_type ?? ''),
+        incident_sector: String(raw.incident_sector ?? ''),
+        incident_status: status(raw.incident_status),
+        incident_severity: String(raw.incident_severity ?? ''),
+        created_at: normalizeDateTime(raw.created_at),
+        updated_at: normalizeDateTime(raw.updated_at ?? raw.created_at),
+    };
+}
+export function toMemberSummary(raw) {
+    return { ...toMember(raw), incident_count: num(raw.incident_count), note_count: num(raw.note_count) };
 }

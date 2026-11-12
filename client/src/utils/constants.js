@@ -46,18 +46,18 @@ export const STATUS_META = {
  * 화면은 Lucide 출처 아이콘과 라벨을 함께 표시합니다. glyph는 이전 데이터 호환용입니다.
  */
 export const SOURCE_META = {
-    '훈련 상황보고': { color: '#252525', glyph: '보', short: '상황보고' },
-    '가상 기상센서': { color: '#399c8b', glyph: '기', short: '기상센서' },
-    '가상 장비센서': { color: '#587b88', glyph: '장', short: '장비센서' },
-    'USGS 지진 관측': { color: '#9b7629', glyph: '지', short: 'USGS' },
-    '가상 레이더': { color: '#747474', glyph: '레', short: '레이더' },
+    '훈련 상황보고': { color: '#5aa9d6', glyph: '보', short: '상황보고' },
+    '가상 기상센서': { color: '#47b39a', glyph: '기', short: '기상센서' },
+    '가상 장비센서': { color: '#8b9bd8', glyph: '장', short: '장비센서' },
+    'USGS 지진 관측': { color: '#c99a4a', glyph: '지', short: 'USGS' },
+    '가상 레이더': { color: '#9aa7b8', glyph: '레', short: '레이더' },
 };
-export const FALLBACK_SOURCE_META = { color: '#747474', glyph: '?', short: '기타' };
+export const FALLBACK_SOURCE_META = { color: '#9aa7b8', glyph: '?', short: '기타' };
 export function sourceMeta(source) {
     return SOURCE_META[source] ?? FALLBACK_SOURCE_META;
 }
 /** 연관 분석 시간 범위 선택지(분) */
 export const CORRELATION_WINDOWS = [15, 30, 60];
 export const DEFAULT_CORRELATION_WINDOW = 30;
-export const APP_NAME = 'DEFENSE NEXUS';
-export const APP_SUBTITLE = '사건·공개 관측 통합·연관 분석 플랫폼';
+export const APP_NAME = 'GOTHAM';
+export const APP_SUBTITLE = '국방 훈련 정보 분석 시스템';

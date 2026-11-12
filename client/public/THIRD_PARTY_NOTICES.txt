@@ -12,3 +12,11 @@ No reference images or story templates are included.
 
 Public observation data and its source credits are documented in
 /docs/DATA_SOURCES.md and /data/usgs-source.json in the source project.
+
+지도 배경 사진 (client/public/map/terrain-marlborough.jpg)
+- "Making Waves in Marlborough Sounds" — NASA Earth Observatory image by Joshua Stevens, using Landsat data from the U.S. Geological Survey.
+- 라이선스: Public domain. 출처와 가공 내역은 client/public/map/SOURCE.txt 참고.
+- 사건 위치는 0~100 가상 좌표이며 이 지역에서 실제로 일어난 일이 아닙니다.
+
+글꼴: Barlow (SIL Open Font License 1.1), IBM Plex Mono (SIL Open Font License 1.1), Noto Sans KR (SIL Open Font License 1.1) — npm @fontsource 패키지로 번들.
+관계 그래프: @xyflow/react (MIT License).

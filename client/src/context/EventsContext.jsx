@@ -1,6 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { api, errorMessage } from '@/services/api';
-import { generateSimulatedEvent } from '@/utils/simulator';
 const EventsContext = createContext(null);
 const sortLatest = (list) => [...list].sort((a, b) => b.occurred_at.localeCompare(a.occurred_at) || b.event_id - a.event_id);
 export function EventsProvider({ children }) {
@@ -22,6 +21,31 @@ export function EventsProvider({ children }) {
         }
     }, []);
     useEffect(() => { void reloadDataset(); }, [reloadDataset]);
+    const [notes, setNotes] = useState([]);
+    const [notesStatus, setNotesStatus] = useState('loading');
+    const reloadNotes = useCallback(async () => {
+        try {
+            setNotes(await api.notes.list());
+            setNotesStatus('ready');
+        }
+        catch {
+            setNotesStatus('error');
+        }
+    }, []);
+    const createNote = useCallback(async (input) => {
+        const created = await api.notes.create(input);
+        await reloadNotes();
+        return created;
+    }, [reloadNotes]);
+    const updateNote = useCallback(async (id, patch) => {
+        const updated = await api.notes.update(id, patch);
+        await reloadNotes();
+        return updated;
+    }, [reloadNotes]);
+    const removeNote = useCallback(async (id) => {
+        await api.notes.remove(id);
+        await reloadNotes();
+    }, [reloadNotes]);
     const [authorNames, setAuthorNames] = useState(new Map());
     const [status, setStatus] = useState('loading');
     const [error, setError] = useState(null);
@@ -31,13 +55,14 @@ export function EventsProvider({ children }) {
             const [list, joined] = await Promise.all([api.events.list(), api.events.listWithAuthors()]);
             setEvents(sortLatest(list));
             setAuthorNames(new Map(joined.map((r) => [r.member_id, r.nickname])));
+            void reloadNotes();
             setStatus('ready');
         }
         catch (e) {
             setError(errorMessage(e, '상황정보를 불러오지 못했습니다.'));
             setStatus('error');
         }
-    }, []);
+    }, [reloadNotes]);
     useEffect(() => {
         reload();
     }, [reload]);
@@ -58,10 +83,9 @@ export function EventsProvider({ children }) {
         setEvents((prev) => prev.filter((e) => e.event_id !== id));
         void reload();
     }, [reload]);
-    const generateSimulated = useCallback(() => create(generateSimulatedEvent(events)), [create, events]);
     const value = useMemo(() => ({
         events,
-        analysisEvents, datasetStatus, datasetError, reloadDataset,
+        dataset, analysisEvents, datasetStatus, datasetError, reloadDataset,
         getAnalysisById: (id) => analysisEvents.find((e) => e.event_id === id),
         authorNames,
         status,
@@ -70,10 +94,10 @@ export function EventsProvider({ children }) {
         create,
         update,
         remove,
-        generateSimulated,
+        notes, notesStatus, reloadNotes, createNote, updateNote, removeNote,
         getById: (id) => events.find((e) => e.event_id === id),
         authorOf: (memberId) => memberId === 0 ? '외부 관측 데이터' : authorNames.get(memberId) ?? `회원 #${memberId}`,
-    }), [events, analysisEvents, datasetStatus, datasetError, reloadDataset, authorNames, status, error, reload, create, update, remove, generateSimulated]);
+    }), [events, dataset, analysisEvents, datasetStatus, datasetError, reloadDataset, authorNames, status, error, reload, create, update, remove, notes, notesStatus, reloadNotes, createNote, updateNote, removeNote]);
     return <EventsContext.Provider value={value}>{children}</EventsContext.Provider>;
 }
 export function useEvents() {

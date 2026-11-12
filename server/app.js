@@ -11,6 +11,7 @@ import authRouter from './routes/auth.js';
 import membersRouter from './routes/members.js';
 import eventsRouter from './routes/events.js';
 import analysisRouter from './routes/analysis.js';
+import notesRouter from './routes/notes.js';
 import { listWithAuthors } from './controllers/events.js';
 
 export const app = express();
@@ -40,6 +41,7 @@ app.use('/api/members', membersRouter);
 app.use('/api/events', eventsRouter);
 app.get('/api/events-with-authors', listWithAuthors);
 app.use('/api/analysis-records', analysisRouter);
+app.use('/api/analysis-notes', notesRouter);
 app.use('/api', (req, res, next) => next(new ApiError(404, 'NOT_FOUND', 'API 경로를 찾을 수 없습니다.')));
 
 // Vite build is served by this Express app; there are no framework API routes.
@@ -51,7 +53,7 @@ if (existsSync(`${clientDirectory}index.html`)) {
       if (path.replaceAll('\\', '/').includes('/assets/')) res.set('Cache-Control', 'public, max-age=31536000, immutable');
     },
   }));
-  const knownPage = /^\/(?:events(?:\/detail)?|analysis|joined|sources|mypage|login|signup)?\/?$/;
+  const knownPage = /^\/(?:events(?:\/detail)?|notes|members|graph|analysis|joined|my-events|sources|mypage|login|signup)?\/?$/;
   app.get(/.*/, (req, res, next) => {
     if (req.path.startsWith('/assets/') || /\.[a-z0-9]+$/i.test(req.path)) return next();
     res.status(knownPage.test(req.path) ? 200 : 404).sendFile('index.html', { root: clientDirectory });

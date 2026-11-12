@@ -7,6 +7,8 @@
 ```mermaid
 erDiagram
     members ||--o{ incidents : "작성 / ON DELETE CASCADE"
+    members ||--o{ analysis_notes : "작성 / ON DELETE CASCADE"
+    incidents ||--o{ analysis_notes : "분석 대상 / ON DELETE CASCADE"
     members {
         int id PK
         varchar username UK
@@ -34,6 +36,23 @@ erDiagram
 ```
 
 회원 한 명은 여러 사건을 작성하고 사건 한 건은 회원 한 명을 참조합니다. 회원 탈퇴 시 해당 작성 사건도 삭제되는 정책입니다.
+
+## analysis_notes
+
+회원이 사건 하나에 대해 남기는 분석 기록입니다. `incidents` 다음에 생성해야 합니다.
+
+| 컬럼 | 제약·역할 |
+|---|---|
+| id | PK, AUTO_INCREMENT, 화면 코드 AN-0001 |
+| incident_id | NOT NULL, FK → incidents.id, ON DELETE CASCADE |
+| author_id | NOT NULL, FK → members.id, ON DELETE CASCADE |
+| title | VARCHAR(150) NOT NULL |
+| assessment | ENUM('관찰','주의','위험') |
+| confidence | ENUM('낮음','보통','높음') |
+| content | TEXT NOT NULL |
+| created_at / updated_at | 등록·수정 시각 |
+
+사건이 삭제되거나 작성 회원이 탈퇴하면 해당 기록도 함께 삭제됩니다. 다른 회원의 사건에도 분석 기록을 남길 수 있으며, 그 회원이 탈퇴하면 기록만 지워지고 사건은 남습니다.
 
 ## members
 

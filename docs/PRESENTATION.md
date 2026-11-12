@@ -10,7 +10,7 @@
 | 4 | 잘못된 비밀번호 후 정상 로그인·내 계정 | bcrypt.compare, HttpOnly JWT, GET /auth/me |
 | 5 | 회원정보 수정 | PATCH /members/me → UPDATE members, Workbench 재조회 |
 | 6 | 훈련 사건 2건 등록·목록·상세·지도 | POST/GET /events, incidents 실제 행 |
-| 7 | 사건·작성자 조회 메뉴·필터·SQL 보기 | /events-with-authors, INNER JOIN, members 1:N incidents |
+| 7 | 전체 사건·작성자(JOIN 1)와 내 사건·회원정보(JOIN 2) 메뉴 | /events-with-authors, /members/me/events, INNER JOIN, members 1:N incidents |
 | 8 | 본인 사건 수정·삭제 | PATCH/DELETE /events/:id, Workbench 확인 |
 | 9 | 브라보 계정에서 알파 사건 수정·삭제 제한 | 화면 메뉴와 직접 API의 403, author_id 조건 |
 | 10 | sql/demo_workbench.sql의 가상 행 CREATE/JOIN/UPDATE/DELETE | 각 블록 후 COMMIT·웹 재조회, 마지막 시연 행 정리 |

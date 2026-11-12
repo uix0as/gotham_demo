@@ -17,8 +17,12 @@ export default {
         danger: {DEFAULT: 'rgb(var(--danger-rgb) / <alpha-value>)', muted: 'rgb(var(--danger-muted-rgb) / <alpha-value>)'},
       },
       fontFamily: {
-        sans: ['Geist Variable', 'Noto Sans KR Variable', 'sans-serif'],
+        sans: ['Barlow', 'Noto Sans KR Variable', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      maxHeight: {
+        panel: '35rem',
+        'panel-lg': '47.5rem',
       },
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],

@@ -21,10 +21,10 @@ export const TextInput = forwardRef(function TextInput({ invalid, className, ...
     return <input ref={ref} className={cx('input', invalid && 'input-invalid', className)} {...rest}/>;
 });
 export function SelectInput({ invalid, className, children, ...rest }) {
-    return (<select className={cx('input appearance-none bg-[length:16px] bg-[right_0.6rem_center] bg-no-repeat pr-8', invalid && 'input-invalid', className)} style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='1.7'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")" }} {...rest}>
+    return (<select className={cx('input input-select', invalid && 'input-invalid', className)} {...rest}>
       {children}
     </select>);
 }
 export function TextArea({ invalid, className, ...rest }) {
-    return <textarea className={cx('input h-auto min-h-[96px] resize-y py-2 leading-relaxed', invalid && 'input-invalid', className)} {...rest}/>;
+    return <textarea className={cx('input h-auto min-h-24 resize-y py-2 leading-relaxed', invalid && 'input-invalid', className)} {...rest}/>;
 }

@@ -1,105 +1,85 @@
-# Gotham · DEFENSE NEXUS
+# GOTHAM · 국방 훈련 정보 분석 시스템
 
-가상 국방 훈련 상황정보를 등록하고 지도·목록·관계망으로 조회하는 데이터베이스 프로젝트입니다. 회원 관리와 사건 관리를 연결하고, MySQL의 외래키와 INNER JOIN으로 사건·작성자 정보를 함께 조회합니다.
+가상 국방 훈련 사건을 등록하고, 사건에 대한 분석 기록과 작성 회원의 관계를 MySQL 외래키·JOIN으로 추적하는 학교 데이터베이스 프로그래밍 프로젝트입니다 (학번 20612). 실제 군사 정보와 무관한 **훈련용 가상 데이터**입니다.
 
-React + Vite + JavaScript 프런트엔드와 Node.js + Express 백엔드를 분리했습니다. DB는 MySQL이며, mysql2/promise로 SQL을 실행합니다.
+- 프론트엔드: React 19 + Vite 8 + JavaScript(JSX), Tailwind CSS, Lucide, Recharts, React Flow(@xyflow/react), 글꼴 Barlow · IBM Plex Mono · Noto Sans KR (npm 패키지로 번들, 외부 CDN 없음)
+- 백엔드: Node.js + Express 5, mysql2/promise, bcrypt, JWT(HttpOnly 쿠키)
+- DB: MySQL 8.0.16 이상 (`gotham_20612`, 계정 `20612`)
 
 ## 주요 기능
 
-- 회원가입, bcrypt 비밀번호 검증, JWT 로그인, 회원정보 조회·수정·탈퇴
-- 로그인 회원의 훈련 사건 등록, 전체 목록·상세 조회, 작성자 본인만 수정·삭제
-- 사건·작성자 JOIN 조회, 작성자 필터, 검색과 페이지 이동
-- 구역·시간 기준 연관 분석, 차트, 가상 구역 지도와 CSV 내보내기
-- 공개 관측 자료의 출처 표시, 밝은·어두운 테마, 모바일 화면
+| 영역 | 기능 | 화면 |
+|---|---|---|
+| 회원 CRUD | 회원가입(bcrypt 해시), 로그인, 회원 목록·상세, 본인 정보 수정, 탈퇴(작성 기록 CASCADE 삭제) | `/signup` `/login` `/members` `/mypage` |
+| 훈련 사건 CRUD | 등록(로그인), 전체 조회·필터·정렬·열 너비 조절, 우측 상세 패널, 작성자만 수정·삭제 | `/events` |
+| 분석 기록 CRUD | 사건 하나에 대한 판단·신뢰도·내용 기록, 작성자만 수정·삭제 | `/notes` |
+| JOIN 화면 1 | 전체 사건 + 등록 회원 아이디·이메일 (서버 INNER JOIN) | `/joined` |
+| JOIN 화면 2 | 내가 등록한 사건·분석 기록 + 내 회원정보 (서버 JOIN, `WHERE m.id = ?`) | `/my-events` |
+| 관계 분석 | 회원 → 사건 → 분석 기록 그래프. 모든 연결선은 외래키 JOIN 결과 | `/graph` |
+| 작전 상황판 | 구역별 상태, 가상 구역 지도, 우선 처리 대기열, 최근 활동, 시간대별 차트 | `/` |
+| 구역·시간 연관 / 데이터 소스 | 규칙 기반 연관 후보, USGS 공개 관측 스냅샷(읽기 전용) | `/analysis` `/sources` |
 
-## 구성
+권한은 브라우저 값을 믿지 않고 서버가 JWT의 회원 ID로 검사합니다 (컨트롤러 확인 + SQL `WHERE ... AND author_id = ?`).
 
-```text
-gotham_demo/
-├── client/                 React·Vite 프런트엔드
-│   └── src/
-│       ├── components/     공통 UI
-│       ├── pages/          화면
-│       ├── App.jsx         라우팅
-│       └── main.jsx        진입점
-├── server/                 Express API
-│   ├── index.js            서버 시작·DB 연결 확인
-│   ├── db.js               MySQL 연결 풀
-│   ├── queries.js          회원·사건 CRUD와 JOIN SQL
-│   ├── routes/             API 경로
-│   ├── controllers/        검증·권한 검사·SQL 호출
-│   ├── middleware/         인증·오류 처리
-│   └── scripts/            DB 초기화·시드·진단·자료 가져오기
-├── sql/                    스키마·시드·Workbench 시연 쿼리
-├── data/                   공개 관측 스냅샷과 출처
-└── docs/                   API·DB·자료 출처·발표 안내
-```
+## 데이터베이스
+
+| 테이블 | 역할 | 관계 |
+|---|---|---|
+| `members` | 회원 (username·email UNIQUE, bcrypt 해시) | — |
+| `incidents` | 훈련 사건 | `author_id → members.id` ON DELETE CASCADE |
+| `analysis_notes` | 분석 기록 | `incident_id → incidents.id`, `author_id → members.id` 둘 다 ON DELETE CASCADE |
+| `analysis_records` | 가져온 공개 관측 자료 (읽기 전용) | 외래키 없음 |
+
+**SQL 실행 순서**: 외래키 때문에 `members → incidents → analysis_notes` 순서로 만들어야 하며, `sql/schema.sql`이 이 순서대로 작성되어 있습니다. 모든 문장이 `CREATE TABLE IF NOT EXISTS`라서 기존 데이터를 지우지 않습니다.
+
+1. `sql/admin-bootstrap.sql` (root) — DB와 `20612` 계정·권한
+2. `sql/schema.sql` (20612) — 테이블 4개
+3. `sql/seed.sql` (선택) — 시연 회원 2명·사건 18건·분석 기록 4건, 다시 실행해도 중복 없음
+4. `npm run data:import` (선택) — 동봉 USGS 관측 1,000건
+
+Mac에서 내보낸 Workbench 덤프(members·incidents·analysis_records)를 복원한 경우에는 그 뒤에 `sql/schema.sql`을 한 번 더 실행해 `analysis_notes`를 추가합니다. 서버는 시작할 때 네 테이블이 모두 있는지 확인하고, 없으면 실행하지 않고 안내를 출력합니다.
 
 ## 설치와 실행
 
-Node.js 24 또는22.12 이상, npm, MySQL Server와 MySQL Workbench가 필요합니다. Windows의 DB 준비와 PowerShell 명령은 [학교 설치 안내](README_SCHOOL_SETUP.md)를 참고하세요.
-
-**현재 DB가 동봉된 학교용 ZIP이라면 [학교 설치 안내의4번](README_SCHOOL_SETUP.md)으로 복원합니다. 이 경우 아래 schema.sql·seed.sql 초기화는 건너뜁니다. GitHub 소스에는 개인 DB 백업이 포함되지 않습니다.**
-
-1. Workbench 관리자 연결에서 `sql/admin-bootstrap.sql`의 예시 비밀번호를 수정하고 실행합니다.
-2. `20612` 계정으로 연결해 `gotham_20612`를 기본 스키마로 선택합니다.
-3. `sql/schema.sql`, `sql/seed.sql`을 순서대로 실행합니다.
-4. 프로젝트 루트에서 다음 명령을 실행합니다. 기존 `.env`는 덮어쓰지 않습니다.
+학교 Windows PC(`D:\GOTHAM`) 기준 전체 절차: **[WINDOWS_SETUP.md](WINDOWS_SETUP.md)**. DB 백업 파일 복원·Workbench 시연 SQL: [README_SCHOOL_SETUP.md](README_SCHOOL_SETUP.md).
 
 ```powershell
-npm run setup
-Copy-Item server/.env.example server/.env
-notepad server/.env
+npm run setup                               # root·server·client npm ci
+Copy-Item server\.env.example server\.env   # 이미 있으면 생략
+notepad server\.env                         # DB_PASSWORD, JWT_SECRET 입력
+npm run diagnose                            # DB 연결·테이블 확인
+npm run dev                                 # Express 5000 + Vite 5173
 ```
 
-`server/.env`에 학교 DB 접속정보와32자 이상의 무작위 JWT_SECRET을 입력합니다. 실제 비밀번호·비밀키는 커밋하지 않습니다.
+- 웹: <http://localhost:5173> · API: <http://localhost:5000/api/health>
+- `JWT_SECRET`은 32자 이상 무작위 값이어야 서버가 시작됩니다: `node -e "console.log(require('node:crypto').randomBytes(48).toString('hex'))"`
+- 실제 `.env`는 `.gitignore`로 제외됩니다.
+- 시연 계정: `alpha@demo.local`, `bravo@demo.local` / `demo1234`
 
-```powershell
-npm run diagnose
-npm run dev
-```
+## CRUD·JOIN 검증 순서 (선생님 평가용)
 
-웹은 <http://localhost:5173>, 기본 API는 <http://localhost:5000/api/health>입니다. Vite가 `/api` 요청을 Express로 전달합니다. 포트를 바꿀 때는 `server/.env`의 PORT와 `client/.env.local`의 API_PROXY_TARGET을 함께 변경합니다.
+1. 회원가입 → 로그인 → `내 계정`에서 정보 확인
+2. `훈련 사건` → 사건 등록 → 목록·상세 패널 확인 → `내 기록`에 바로 표시되는지 확인
+3. 상세 패널에서 수정 → 저장 결과 확인
+4. `이 사건 분석 기록 작성` → `분석 기록`에서 수정
+5. `전체 사건·작성자`(JOIN 1), `내 기록`(JOIN 2), `관계 분석` 확인
+6. 다른 회원의 사건을 열면 "조회 전용" (API로 직접 요청해도 403)
+7. 분석 기록·사건 삭제 → 목록에서 사라짐
+8. `내 계정` → 회원정보 수정 → 회원탈퇴("탈퇴" 입력) → 재로그인 실패
 
-## 데이터
+각 단계의 Workbench 확인 SQL은 WINDOWS_SETUP.md 11절에 있습니다.
 
-기본 시드는 가상 회원2명과 훈련 사건18건입니다. 실제 군사정보·개인정보를 사용하지 않습니다. 시연 계정은 `alpha@demo.local`, `bravo@demo.local`, 비밀번호는 `demo1234`입니다. DB에는 bcrypt 해시를 저장합니다.
-
-USGS의 실제 공개 지진 관측1,000건은 별도 분석 테이블에 저장합니다. 동봉 GeoJSON 스냅샷을 가져오려면 다음 명령을 실행합니다.
-
-```powershell
-npm run data:import
-```
-
-자료는 저장 시점의 스냅샷이며 실시간 관측이 아닙니다. 원본 좌표와 출처를 보존하고, 지도상의 정규화 좌표·구역·중요도는 시연을 위한 표시값입니다. 합성 CSV2행은 다음 명령으로 가져올 수 있습니다.
-
-```powershell
-node server/scripts/import-data.js --file docs/example-analysis.csv
-```
-
-자료의 출처와 이용 조건은 [데이터 출처](docs/DATA_SOURCES.md)를 참고하세요.
-
-## 빌드와 검사
+## 검사
 
 ```powershell
 npm run lint
 npm run build
-npm test
+npm test      # 실제 MySQL에 임시 회원·사건·분석 기록을 만들고 정리 (세부 시나리오 14개)
 ```
 
-테스트는 설정된 실제 MySQL에 고유한 검증용 회원·사건을 생성하고 정리합니다. 빌드 후 개발 서버를 종료하고 `npm start`를 실행하면 Express가 `client/dist`와 API를 함께 제공합니다.
+## 문서
 
-macOS에서 빌드·API·MySQL·압축 해제 후 설치를 검증했습니다. 실제 Windows 실행은 학교 PC에서 확인해야 합니다.
+- [API 규격](docs/API_CONTRACT.md) · [DB 스키마](docs/DATABASE_SCHEMA.md) · [프로젝트 개요](docs/PROJECT_OVERVIEW.md) · [발표 순서](docs/PRESENTATION.md) · [데이터 출처](docs/DATA_SOURCES.md)
+- 실제 SQL: [server/queries.js](server/queries.js)
 
-## SQL 시연과 문서
-
-- [Workbench CRUD·JOIN 시연](sql/demo_workbench.sql): 번호 블록별 실행 후 웹에서 재조회
-- [실제 API SQL](server/queries.js): INSERT·SELECT·UPDATE·DELETE·INNER JOIN
-- [API 규격](docs/API_CONTRACT.md)
-- [DB 스키마](docs/DATABASE_SCHEMA.md)
-- [프로젝트 개요](docs/PROJECT_OVERVIEW.md)
-- [발표 순서](docs/PRESENTATION.md)
-
-웹과 Workbench는 같은 `gotham_20612`를 사용합니다. `sql/verify_connection.sql`과 `npm run diagnose`로 DB 이름·서버·포트·계정을 비교할 수 있습니다.
-
-`npm run package`는 `release/gotham_demo.zip`을 생성합니다. 실제 환경설정·의존성·빌드 결과·MySQL 원시 데이터 파일은 제외합니다. 로컬 sql/gotham_20612_backup.sql이 있으면 학교용 ZIP에 함께 넣습니다. 이 SQL 백업은 Git에서 제외하며, 복원 절차는 README_SCHOOL_SETUP.md에 있습니다.
+USGS 관측은 2026-11-08에 저장한 스냅샷이며 실시간 연동이 아닙니다. 지도 배경은 NASA Earth Observatory / USGS Landsat 공개(Public domain) 위성사진이고(`client/public/map/SOURCE.txt`), 사건 좌표·구역은 그 위에 올린 0~100 가상 값입니다. 해당 지역에서 실제로 일어난 일이 아닙니다.

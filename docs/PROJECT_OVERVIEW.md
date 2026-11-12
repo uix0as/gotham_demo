@@ -12,12 +12,16 @@ DEFENSE NEXUS는 가상의 사건·센서 정보를 지도·목록·관계망으
 
 | 경로 | 화면 | 역할 |
 |---|---|---|
-| `/` | 종합 상황판 | DB 사건 KPI·지도·최근 목록·차트 |
-| `/events` | 사건 목록 | 검색·필터·등록·수정·삭제 |
-| `/events/:id` | 사건 상세 | 사건 전체 필드·위치·관련 사건 |
-| `/analysis` | 연관 분석 | DB 사건의 구역·시각 기반 관계망·차트 |
-| `/joined` | 사건·작성자 통합 분석 | 실제 INNER JOIN 결과 |
-| `/mypage` | 마이페이지 | 자기 회원정보 수정·작성 사건·탈퇴 |
+| `/` | 작전 상황판 | 구역별 상태·가상 구역 지도·우선 처리 대기열·최근 활동·시간대 차트 |
+| `/events` | 훈련 사건 | 필터·정렬·열 너비 조절 테이블 + 우측 상세 패널, 등록·수정·삭제 |
+| `/notes` | 분석 기록 | 기록 ⨝ 회원 ⨝ 사건 목록, 등록·수정·삭제 |
+| `/members` | 회원 | 회원 목록·상세·작성 기록, 본인 수정·탈퇴 (로그인 필요) |
+| `/graph` | 관계 분석 | React Flow 그래프: 회원 → 사건 → 분석 기록 (외래키 JOIN 결과) |
+| `/analysis` | 구역·시간 연관 | 구역·시각 기반 규칙 연관 후보와 차트 |
+| `/joined` | 전체 사건·작성자 | JOIN 화면 1: 전체 사건 + 작성자 INNER JOIN |
+| `/my-events` | 내 기록 | JOIN 화면 2: 로그인 회원의 사건·분석 기록 + 회원정보 (WHERE m.id = ?) |
+| `/sources` | 데이터 소스 | 공개 관측 스냅샷 출처 (읽기 전용) |
+| `/mypage` | 내 계정 | 회원정보 조회·수정·탈퇴 |
 | `/login`, `/signup` | 로그인·회원가입 | JWT 인증·회원 CREATE |
 
 비로그인 사용자는 조회할 수 있습니다. 로그인한 회원은 사건을 등록하고 본인의 사건만 수정·삭제합니다. 마이페이지 API는 토큰에서 본인 ID를 얻습니다.
@@ -44,7 +48,7 @@ React 화면 / Context
 4. `server/middleware/auth.js`, `validation.js`: JWT·서버 입력 검증.
 5. `client/src/services/httpApi.js`: Axios API 호출.
 6. `client/src/context/EventsContext.jsx`, `AuthContext.jsx`: 화면 데이터 갱신.
-7. `client/src/pages/JoinedRecords.jsx`: 독립 JOIN 메뉴.
+7. `client/src/pages/JoinedRecords.jsx`, `MyJoinedRecords.jsx`: JOIN 화면 1·2.
 8. `client/src/analysis/ruleBasedEngine.js`: 조회한 사건으로 관계 계산.
 
 실행 방법은 루트 README와 README_SCHOOL_SETUP.md, 발표 준비는 PRESENTATION.md를 참고합니다.

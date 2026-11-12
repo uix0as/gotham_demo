@@ -19,7 +19,7 @@ export default function Sources() {
     });
     const publicCount = imported.filter((event) => !event.is_synthetic && event.data_source !== 'synthetic').length;
     return <div className="workspace-page sources-page">
-    <PageHeader title="데이터 소스" icon={<Database />} description="회원 사건과 공개 관측을 구분하고, 자료의 출처와 수집 시점을 확인합니다." actions={<Button disabled={refreshing} icon={<RefreshCw size={15} className={refreshing ? 'animate-spin' : ''}/>} onClick={async () => {
+    <PageHeader code="SYS-SRC" title="데이터 소스" description="회원 사건과 공개 관측을 구분하고, 자료의 출처와 수집 시점을 확인합니다." actions={<Button disabled={refreshing} icon={<RefreshCw size={15} className={refreshing ? 'animate-spin' : ''}/>} onClick={async () => {
                 setRefreshing(true);
                 try {
                     await reloadDataset();

@@ -1,0 +1,8 @@
+terrain-marlborough.jpg
+- 원본: "Making Waves in Marlborough Sounds" (Landsat 8 OLI, 2017-12-02)
+- 제작: NASA Earth Observatory image by Joshua Stevens, using Landsat data from the U.S. Geological Survey.
+- 출처: https://earthobservatory.nasa.gov/images/91668/making-waves-in-marlborough-sounds
+- 파일: https://commons.wikimedia.org/wiki/File:Making_Waves_in_Marlborough_Sounds.jpeg
+- 라이선스: Public domain (Wikimedia Commons LicenseShortName / UsageTerms 확인, 2026-11-12)
+- 가공: 왼쪽 위 육지 부분을 16:10으로 잘라 1920x1200으로 줄이고 JPEG 압축.
+- 용도: 가상 훈련구역 지도의 배경 사진. 사건 위치(map_x, map_y)는 0~100 가상 좌표이며 이 지역에서 실제로 일어난 일이 아닙니다.

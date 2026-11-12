@@ -24,7 +24,7 @@ export function requireSettings() {
 
 export const config = {
   port: Number(process.env.PORT || 5000),
-  origins: (process.env.CLIENT_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173').split(',').map((s) => s.trim()),
+  origins: (process.env.CLIENT_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173').split(',').map((s) => s.trim()),
   secureCookie: process.env.COOKIE_SECURE === 'true',
   jwtSecret: process.env.JWT_SECRET,
 };

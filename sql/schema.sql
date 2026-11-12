@@ -43,6 +43,27 @@ CREATE TABLE IF NOT EXISTS incidents (
 -- 회원 탈퇴 정책: 회원의 사건은 ON DELETE CASCADE로 함께 삭제됩니다.
 -- DATETIME은 UTC로 저장하며 API에서는 ISO 8601(Z), 화면에서는 한국 시간으로 표시합니다.
 
+-- 분석 기록: 회원이 사건 하나에 대해 작성하는 분석 메모입니다. (members 1:N, incidents 1:N)
+-- 사건이 삭제되거나 작성 회원이 탈퇴하면 함께 삭제됩니다. incidents 다음에 생성해야 합니다.
+CREATE TABLE IF NOT EXISTS analysis_notes (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  incident_id INT UNSIGNED NOT NULL,
+  author_id INT UNSIGNED NOT NULL,
+  title VARCHAR(150) NOT NULL,
+  assessment ENUM('관찰', '주의', '위험') NOT NULL DEFAULT '관찰',
+  confidence ENUM('낮음', '보통', '높음') NOT NULL DEFAULT '보통',
+  content TEXT NOT NULL,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (id),
+  KEY idx_notes_incident (incident_id),
+  KEY idx_notes_author (author_id),
+  CONSTRAINT fk_notes_incident FOREIGN KEY (incident_id)
+    REFERENCES incidents(id) ON DELETE CASCADE,
+  CONSTRAINT fk_notes_author FOREIGN KEY (author_id)
+    REFERENCES members(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 외부 분석 자료는 수동 CRUD 사건과 분리합니다. 작성자/회원 FK가 없으며 회원 탈퇴에도 유지됩니다.
 CREATE TABLE IF NOT EXISTS analysis_records (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,

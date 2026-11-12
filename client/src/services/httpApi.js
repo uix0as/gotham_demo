@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ApiError, notifyAuthExpired } from './errors';
-import { toEvent, toEventWithAuthor, toMember } from './mappers';
+import { toEvent, toEventWithAuthor, toMember, toMemberSummary, toNote } from './mappers';
 /**
  * httpApi — 실제 Node.js/Express 백엔드 연결용 구현.
  * - 모든 요청에 withCredentials: true (HttpOnly JWT 쿠키 전송)
@@ -79,6 +79,33 @@ export const httpApi = {
         },
         async deleteMe() {
             await request('DELETE', '/members/me');
+        },
+        async myEventsWithAuthor() {
+            return (await request('GET', '/members/me/events')).map(toEventWithAuthor);
+        },
+        async myNotes() {
+            return (await request('GET', '/members/me/notes')).map(toNote);
+        },
+        async list() {
+            return (await request('GET', '/members')).map(toMemberSummary);
+        },
+        async records(memberId) {
+            const data = await request('GET', `/members/${memberId}/records`);
+            return { member: toMember(data.member), incidents: data.incidents.map(toEventWithAuthor), notes: data.notes.map(toNote) };
+        },
+    },
+    notes: {
+        async list() {
+            return (await request('GET', '/analysis-notes')).map(toNote);
+        },
+        async create(input) {
+            return toNote(await request('POST', '/analysis-notes', { body: input }));
+        },
+        async update(noteId, patch) {
+            return toNote(await request('PATCH', `/analysis-notes/${noteId}`, { body: patch }));
+        },
+        async remove(noteId) {
+            await request('DELETE', `/analysis-notes/${noteId}`);
         },
     },
     events: {

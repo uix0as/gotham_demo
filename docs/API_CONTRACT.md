@@ -44,6 +44,10 @@ API 테스트용 `Authorization: Bearer <JWT>`도 지원합니다. 브라우저�
 | GET | `/auth/me` | 필요 | 없음 | 현재 회원 |
 | PATCH | `/members/me` | 필요 | nickname, 선택 email | 수정된 회원 |
 | DELETE | `/members/me` | 필요 | 없음 | 회원 및 작성 사건 삭제, 쿠키 제거 |
+| GET | `/members/me/events` | 필요 | 없음 | 로그인 회원의 사건 + 회원정보 INNER JOIN 결과 |
+| GET | `/members/me/notes` | 필요 | 없음 | 로그인 회원의 분석 기록 + 회원 + 대상 사건 JOIN |
+| GET | `/members` | 필요 | 없음 | 회원 목록 + 작성 사건 수·분석 수 (LEFT JOIN, GROUP BY) |
+| GET | `/members/:id/records` | 필요 | 없음 | `{ member, incidents, notes }` 회원 상세와 작성 기록 |
 
 회원 응답에는 다음 공개 필드만 포함합니다. `password_hash`는 조회 응답에 포함하지 않습니다.
 
@@ -122,7 +126,32 @@ INNER JOIN members AS m ON i.author_id = m.id
 ORDER BY i.occurred_at DESC, i.id DESC;
 ```
 
+`GET /members/me/events`(로그인 필요)는 같은 JOIN에 로그인 회원 조건을 더하고 `member_created_at`(가입 시각)을 함께 반환합니다. 회원 ID는 요청 값이 아니라 JWT에서 서버가 정합니다.
+
+```sql
+SELECT i.id AS event_id, i.title, i.category AS event_type, i.status, i.occurred_at,
+       m.id AS member_id, m.username, m.email, m.created_at AS member_created_at
+FROM incidents AS i
+INNER JOIN members AS m ON i.author_id = m.id
+WHERE m.id = ?
+ORDER BY i.occurred_at DESC, i.id DESC;
+```
+
 실제 쿼리는 지도·상세 표시용 사건 필드도 함께 선택합니다. 결과를 프론트에서 회원 배열과 사건 배열로 다시 합치지 않습니다. 가상 이메일은 수행평가 필수 JOIN 필드로 표시하며 비밀번호 해시는 선택하지 않습니다.
+
+## 분석 기록 (analysis_notes)
+
+| 메서드 | 경로 | 인증 | 결과 |
+|---|---|---|---|
+| GET | `/analysis-notes` | 공개 | 기록 ⨝ 작성 회원 ⨝ 대상 사건 3개 테이블 INNER JOIN |
+| GET | `/analysis-notes/:id` | 공개 | 단일 기록 |
+| POST | `/analysis-notes` | 필요 | 201 기록 생성 (`incident_id`, `title`, `assessment`, `confidence`, `content`) |
+| PATCH | `/analysis-notes/:id` | 작성자 | 변경된 기록 (부분 수정 가능) |
+| DELETE | `/analysis-notes/:id` | 작성자 | 삭제 성공 |
+
+- `assessment`: 관찰·주의·위험, `confidence`: 낮음·보통·높음, `title` 1~150자, `content` 5~2000자.
+- 존재하지 않는 `incident_id`는 400, 타인 기록 수정·삭제는 403. 작성자는 요청 본문이 아니라 JWT로 정합니다.
+- 응답 필드: `note_id, incident_id, author_id, member_id, title, assessment, confidence, content, username, nickname, email, incident_title, incident_type, incident_sector, incident_status, incident_severity, created_at, updated_at`.
 
 ## 분석 전용 공개 데이터
 

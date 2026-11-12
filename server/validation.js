@@ -88,3 +88,37 @@ export function validateIncident(body, partial = false) {
   validationError(errors);
   return output;
 }
+
+const assessments = ['관찰', '주의', '위험'];
+const confidences = ['낮음', '보통', '높음'];
+
+export function recordId(value, label = 'ID') {
+  if (!/^\d+$/.test(String(value)) || !Number.isSafeInteger(Number(value)) || Number(value) < 1 || Number(value) > 4294967295) {
+    throw new ApiError(400, 'VALIDATION_ERROR', `${label}는 양의 정수여야 합니다.`);
+  }
+  return Number(value);
+}
+
+export function validateNote(body, partial = false) {
+  bodyObject(body);
+  const output = {};
+  const errors = {};
+  if (!partial || body.incident_id !== undefined) {
+    if (!Number.isInteger(body.incident_id) || body.incident_id < 1) errors.incident_id = '대상 사건을 선택해 주세요.';
+    output.incident_id = body.incident_id;
+  }
+  for (const [field, min, max] of [['title', 1, 150], ['content', 5, 2000]]) {
+    if (partial && body[field] === undefined) continue;
+    const value = trimmed(body[field]);
+    if (value.length < min || value.length > max) errors[field] = `${min}~${max}자로 입력해 주세요.`;
+    output[field] = value;
+  }
+  for (const [field, choices] of [['assessment', assessments], ['confidence', confidences]]) {
+    if (partial && body[field] === undefined) continue;
+    if (!choices.includes(body[field])) errors[field] = `${choices.join(', ')} 중 선택해 주세요.`;
+    output[field] = body[field];
+  }
+  if (partial && !Object.keys(output).length) errors.form = '수정할 분석 기록 정보를 입력해 주세요.';
+  validationError(errors);
+  return output;
+}

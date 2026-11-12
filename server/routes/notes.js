@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { requireAuth } from '../middleware/auth.js';
+import * as controller from '../controllers/notes.js';
+const router = Router();
+router.get('/', controller.list);
+router.get('/:id', controller.get);
+router.post('/', requireAuth, controller.create);
+router.patch('/:id', requireAuth, controller.update);
+router.delete('/:id', requireAuth, controller.remove);
+export default router;

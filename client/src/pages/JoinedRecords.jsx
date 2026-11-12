@@ -1,26 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Code2, Database, FileText, Search, Users } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
+import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import { api, errorMessage } from '@/services/api';
 import { useEvents } from '@/context/EventsContext';
-import { formatDate, formatDateTime, formatTime } from '@/utils/date';
+import { formatDateTime } from '@/utils/date';
 import { displayEventTitle, eventCode, memberCode } from '@/utils/format';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { Panel } from '@/components/ui/Panel';
 import { Button } from '@/components/ui/Button';
-import { KpiCard } from '@/components/ui/KpiCard';
-import { SelectInput } from '@/components/ui/Field';
-import { EmptyState, ErrorState, SkeletonRows } from '@/components/ui/States';
-import { SeverityBadge, SectorBadge, SourceBadge, StatusBadge } from '@/components/ui/Badges';
+import { DataTable, FilterBar, FilterSelect, PageBar, Pager, SeverityTag, StatTile, StatusTag, Tag, sortRows, usePaged, useSort, useColumnFilters, applyColumnFilters } from '@/components/gx/Explorer';
+
 const JOIN_SQL = `SELECT i.id AS event_id, i.title, i.category AS event_type,
-       i.severity, i.status, i.author_id AS member_id,
-       m.username, m.email, i.created_at
+       i.severity, i.status, i.occurred_at,
+       m.id AS member_id, m.username, m.email
   FROM incidents AS i
  INNER JOIN members AS m ON i.author_id = m.id
  ORDER BY i.occurred_at DESC, i.id DESC;`;
-const PAGE_SIZE = 10;
+
+/** JOIN 화면 1 — 전체 훈련 사건 + 등록자 정보 (GET /api/events-with-authors, 서버 INNER JOIN) */
 export default function JoinedRecords() {
     const { events } = useEvents();
+    const navigate = useRouterNavigate();
     const [rows, setRows] = useState([]);
     const [state, setState] = useState('loading');
     const [err, setErr] = useState('');
@@ -28,63 +26,46 @@ export default function JoinedRecords() {
     const [author, setAuthor] = useState('');
     const [showSql, setShowSql] = useState(false);
     const [attempt, setAttempt] = useState(0);
-    const [page, setPage] = useState(1);
+    const [sort, toggleSort] = useSort('occurred_at', 'desc');
     useEffect(() => {
         let alive = true;
         setState('loading');
-        api.events.listWithAuthors().then((result) => {
-            if (alive) {
-                setRows(result);
-                setState('ready');
-            }
-        }).catch((error) => {
-            if (alive) {
-                setErr(errorMessage(error));
-                setState('error');
-            }
-        });
+        api.events.listWithAuthors().then((r) => { if (alive) { setRows(r); setState('ready'); } }).catch((e) => { if (alive) { setErr(errorMessage(e)); setState('error'); } });
         return () => { alive = false; };
     }, [events, attempt]);
-    const authors = useMemo(() => {
-        const totals = new Map();
-        for (const row of rows)
-            totals.set(row.member_id, { nickname: row.nickname, email: row.email, count: (totals.get(row.member_id)?.count ?? 0) + 1 });
-        return [...totals.entries()].sort((a, b) => a[0] - b[0]);
-    }, [rows]);
+    const authors = useMemo(() => [...new Map(rows.map((r) => [r.member_id, r])).values()].sort((a, b) => a.member_id - b.member_id), [rows]);
+    const columns = useMemo(() => [
+        { key: 'event_id', label: 'i.id', width: 86, render: (r) => <span className="gx-code">{eventCode(r.event_id)}</span>, sortValue: (r) => r.event_id, searchText: (r) => eventCode(r.event_id) },
+        { key: 'title', label: '사건명 / 유형', width: 260, render: (r) => <span className="gx-cell-title">{displayEventTitle(r.title)}<small>{r.event_type}</small></span> },
+        { key: 'status', label: '상태', width: 104, render: (r) => <StatusTag status={r.status}/> },
+        { key: 'severity', label: '중요도', width: 92, render: (r) => <SeverityTag severity={r.severity}/> },
+        { key: 'sector', label: '구역', width: 70, render: (r) => <Tag>{r.sector}</Tag> },
+        { key: 'occurred_at', label: '발생 시각', width: 146, render: (r) => <span className="gx-mono">{formatDateTime(r.occurred_at)}</span>, searchText: (r) => formatDateTime(r.occurred_at) },
+        { key: 'member_id', label: 'm.id', width: 84, render: (r) => <span className="gx-code">{memberCode(r.member_id)}</span>, searchText: (r) => memberCode(r.member_id) },
+        { key: 'username', label: '등록자 m.username', width: 140 },
+        { key: 'email', label: 'm.email', width: 190 },
+    ], []);
+    const colFilter = useColumnFilters();
     const filtered = useMemo(() => {
         const term = q.trim().toLowerCase();
-        return rows.filter((row) => (!author || String(row.member_id) === author) && (!term || [eventCode(row.event_id), memberCode(row.member_id), row.nickname, row.username, row.email, row.title, row.severity, row.source_type, row.event_type, row.sector, row.description, row.status].join(' ').toLowerCase().includes(term)));
-    }, [rows, q, author]);
-    const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-    const currentPage = Math.min(page, pageCount);
-    const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-    function chooseAuthor(value) { setAuthor(value); setPage(1); }
-    return <div className="workspace-page joined-page">
-    <PageHeader title="사건·작성자 조회" icon={<Database />} description="사건과 회원을 작성자 ID로 연결해 상황정보와 작성자 아이디·이메일을 함께 확인합니다." actions={<span className="app-badge app-sector"><Database size={12}/>INNER JOIN</span>}/>
-    <div className="summary-strip is-three">
-      <KpiCard label="연결된 사건" value={rows.length} icon={<FileText />} caption="실제 회원 사건 조회 결과" loading={state === 'loading'}/>
-      <KpiCard label="참여 작성자" value={authors.length} icon={<Users />} caption="사건을 등록한 회원" loading={state === 'loading'}/>
-      <KpiCard label="현재 조회 결과" value={filtered.length} icon={<Search />} caption={author ? '선택한 작성자의 사건' : '전체 작성자 기준'} loading={state === 'loading'}/>
-    </div>
-
-    <Panel title="사건과 작성자" icon={<Database />} actions={<span className="data-caption"><strong>{filtered.length}</strong>건</span>} bodyClassName="p-0">
-      <div className="data-toolbar"><div className="data-search"><Search aria-hidden/><input type="search" className="input" placeholder="사건명, 작성자 아이디, 이메일 검색..." value={q} onChange={(event) => { setQ(event.target.value); setPage(1); }} aria-label="JOIN 결과 검색"/></div><SelectInput aria-label="작성자 필터" value={author} onChange={(event) => chooseAuthor(event.target.value)}><option value="">모든 작성자</option>{authors.map(([id, record]) => <option key={id} value={id}>{record.nickname} ({memberCode(id)})</option>)}</SelectInput>{(q || author) && <Button variant="ghost" onClick={() => { setQ(''); chooseAuthor(''); }}>초기화</Button>}</div>
-      {state === 'loading' ? <SkeletonRows rows={6}/> : state === 'error' ? <ErrorState message={err} onRetry={() => setAttempt((value) => value + 1)}/> : !filtered.length ? <EmptyState title="JOIN 결과가 없습니다" message={rows.length ? '검색어나 작성자 조건을 변경해 보세요.' : '등록된 상황정보가 없습니다.'}/> : <>
-        <div className="app-table-scroll is-desktop"><table className="app-data-table joined-data-table"><caption className="sr-only">회원과 상황정보 INNER JOIN 결과</caption><thead><tr>{['사건 ID', '상황정보 / 유형', '작성자', '구역 / 출처', '상태 / 중요도', '발생 / 등록 시각', '상세'].map((label) => <th key={label} scope="col">{label}</th>)}</tr></thead><tbody>{visible.map((row) => <tr key={row.event_id}>
-          <td><Link to={`/events/detail/?id=${row.event_id}`} className="table-record-link">{eventCode(row.event_id)}</Link></td>
-          <td><Link to={`/events/detail/?id=${row.event_id}`} className="table-record-title">{displayEventTitle(row.title)}</Link><span className="record-meta">{row.event_type}</span><p className="record-meta record-description" title={row.description}>{row.description}</p></td>
-          <td><div className="person-cell"><span className="app-avatar" aria-hidden>{row.nickname.slice(0, 1)}</span><div><strong>{row.username}</strong><small>{memberCode(row.member_id)}</small><small>{row.email}</small></div></div></td>
-          <td><SectorBadge sector={row.sector}/><div className="record-meta"><SourceBadge source={row.source_type} compact/></div></td>
-          <td><div className="record-state-cell"><StatusBadge status={row.status}/><SeverityBadge severity={row.severity}/></div></td>
-          <td><span className="record-date">{formatDate(row.occurred_at).slice(5)} · {formatTime(row.occurred_at)}<span>등록 {formatDateTime(row.created_at)}</span></span></td>
-          <td><Link to={`/events/detail/?id=${row.event_id}`} className="console-icon" aria-label={`${eventCode(row.event_id)} 상세 보기`}><ArrowUpRight size={17}/></Link></td>
-        </tr>)}</tbody></table></div>
-        <ul className="app-record-cards">{visible.map((row) => <li key={row.event_id}><div className="record-card-top"><Link to={`/events/detail/?id=${row.event_id}`} className="table-record-link">{eventCode(row.event_id)}</Link><SectorBadge sector={row.sector}/><StatusBadge status={row.status}/></div><Link to={`/events/detail/?id=${row.event_id}`} className="record-card-title">{displayEventTitle(row.title)}</Link><p className="record-card-description">{row.description}</p><div className="record-card-meta"><span>{row.event_type}</span><SeverityBadge severity={row.severity}/><SourceBadge source={row.source_type}/></div><div className="record-card-author"><span className="app-avatar" aria-hidden>{row.nickname.slice(0, 1)}</span><div><strong>{row.username} · {memberCode(row.member_id)}</strong><small>{row.email}</small></div></div><div className="record-card-meta"><span>발생 {formatDateTime(row.occurred_at)}</span><span>등록 {formatDateTime(row.created_at)}</span></div></li>)}</ul>
-      </>}
-      <div className="data-table-footer"><span>총 {filtered.length}건 중 {filtered.length ? `${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, filtered.length)}` : 0}건</span><div className="pagination-buttons"><Button size="sm" variant="outline" aria-label="이전 페이지" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}><ChevronLeft size={16}/></Button><span>{currentPage} / {pageCount}</span><Button size="sm" variant="outline" aria-label="다음 페이지" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}><ChevronRight size={16}/></Button></div></div>
-    </Panel>
-
-    <div className="joined-support-grid"><Panel title="작성자별 등록 현황" icon={<Users />} bodyClassName="p-0">{!authors.length ? <EmptyState title="표시할 작성자가 없습니다"/> : <ul className="author-list">{authors.map(([id, record]) => <li key={id}><button type="button" onClick={() => chooseAuthor(author === String(id) ? '' : String(id))} aria-pressed={author === String(id)}><span className="app-avatar" aria-hidden>{record.nickname.slice(0, 1)}</span><div><strong>{record.nickname}</strong><small>{memberCode(id)} · 전체의 {rows.length ? Math.round(record.count / rows.length * 100) : 0}%</small><div className="author-track" aria-hidden><span style={{ width: `${rows.length ? record.count / rows.length * 100 : 0}%` }}/></div></div><b>{record.count}<small>건</small></b></button></li>)}</ul>}</Panel>
-    <Panel title="INNER JOIN 조회 쿼리" icon={<Code2 />} actions={<Button size="sm" variant="ghost" aria-expanded={showSql} onClick={() => setShowSql(!showSql)}>{showSql ? '쿼리 접기' : '쿼리 보기'}<ChevronDown size={14} style={{ transform: showSql ? 'rotate(180deg)' : undefined }}/></Button>} bodyClassName="p-0">{showSql ? <pre className="sql-code"><code>{JOIN_SQL}</code></pre> : <div className="sql-summary"><Code2 size={19} className="shrink-0 mt-1"/><p>사건의 작성자 ID와 회원 ID를 연결합니다. 실제 MySQL 조회 결과이며 작성자 아이디·이메일이 사건 정보와 함께 표시됩니다.</p></div>}</Panel></div>
-  </div>;
+        return sortRows(applyColumnFilters(rows, columns, colFilter.filters).filter((r) => (!author || String(r.member_id) === author) && (!term || [eventCode(r.event_id), r.title, r.event_type, r.username, r.email, r.sector, r.status].join(' ').toLowerCase().includes(term))), columns, sort);
+    }, [rows, q, author, columns, sort, colFilter.filters]);
+    const paged = usePaged(filtered, 15);
+    return <div className="gx-page">
+      <PageBar code="JOIN-01" title="전체 사건·작성자" description="incidents와 members를 author_id = id로 INNER JOIN한 결과입니다. 사건 정보와 등록 회원의 아이디·이메일이 한 행에 함께 나옵니다."
+        actions={<Button size="sm" variant="ghost" onClick={() => setShowSql(!showSql)} aria-expanded={showSql}>JOIN 쿼리<ChevronDown size={14} style={{ transform: showSql ? 'rotate(180deg)' : undefined }}/></Button>}/>
+      {showSql && <pre className="sql-code">{JOIN_SQL}</pre>}
+      <div className="gx-stats is-compact">
+        <StatTile label="JOIN 결과 행" value={state === 'loading' ? '—' : rows.length}/>
+        <StatTile label="등록 회원" value={state === 'loading' ? '—' : authors.length}/>
+        <StatTile label="현재 조회" value={filtered.length} sub={author ? '선택한 등록자' : '전체 등록자'}/>
+      </div>
+      <FilterBar>
+        <label className="gx-filter gx-filter-search"><span>검색</span><input type="search" value={q} placeholder="사건명·아이디·이메일" onChange={(e) => { setQ(e.target.value); paged.setPage(1); }}/></label>
+        <FilterSelect label="등록자" value={author} onChange={(v) => { setAuthor(v); paged.setPage(1); }} options={authors.map((a) => ({ value: String(a.member_id), label: `${a.username} (${memberCode(a.member_id)})` }))}/>
+      </FilterBar>
+      <DataTable caption="훈련 사건과 등록자 INNER JOIN 결과" colFilter={colFilter} columns={columns} rows={paged.slice} rowKey={(r) => r.event_id} sort={sort} onSort={toggleSort} onSelect={(r) => navigate(`/events?id=${r.event_id}`)}
+        loading={state === 'loading'} error={state === 'error' ? <>{err} <button type="button" className="gx-link" onClick={() => setAttempt((a) => a + 1)}>다시 시도</button></> : null}
+        empty={rows.length ? '조건에 맞는 결과가 없습니다.' : '등록된 훈련 사건이 없습니다.'} footer={<Pager paged={paged} total={filtered.length}/>}/>
+    </div>;
 }

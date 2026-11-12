@@ -79,7 +79,7 @@ export default function Analysis() {
     const ratio = scoped.length ? Math.round((linkedIds.size / scoped.length) * 100) : 0;
     const loading = status === 'loading' && datasetStatus === 'loading' && !events.length;
     return (<div className="workspace-page analysis-page">
-      <PageHeader icon={<GitBranch />} title="연관 분석" description="회원 사건과 공개 관측·가상 데이터를 예시 구역과 시간 근접성으로 연결해 연관 후보를 탐색합니다." actions={<span className="app-badge app-sector">
+      <PageHeader code="ANL-COR" title="구역·시간 연관" description="회원 사건과 공개 관측·가상 데이터를 예시 구역과 시간 근접성으로 연결해 연관 후보를 탐색합니다." actions={<span className="app-badge app-sector">
             <Sigma className="h-3.5 w-3.5 text-accent" aria-hidden/>
             {correlationEngine.label} · AI 미사용
           </span>}/>
@@ -116,12 +116,12 @@ export default function Analysis() {
           </div>
         </Panel>
 
-        <EventDetailPanel className="max-h-[760px] xl:sticky xl:top-20" event={selected} windowMinutes={win} onSelect={setSelectedId} onClose={() => setSelectedId(null)} onEdit={editor.openEdit} onDelete={editor.requestDelete}/>
+        <EventDetailPanel className="max-h-panel-lg xl:sticky xl:top-20" event={selected} windowMinutes={win} onSelect={setSelectedId} onClose={() => setSelectedId(null)} onEdit={editor.openEdit} onDelete={editor.requestDelete}/>
       </div>
 
       <div className="analysis-bottom-grid">
         <Panel title="관련 사건 묶음" icon={<GitBranch className="h-4 w-4"/>} subtitle={`전체 ${result.clusters.length}개 중 규모순 최대 50개 표시 · 같은 예시 구역에서 ±${win}분 간격의 연결 사슬`} bodyClassName="p-0">
-          {loading ? (<LoadingState compact/>) : result.clusters.length === 0 ? (<EmptyState title="연관 후보 묶음이 없습니다" message={`현재 조건(±${win}분)에서는 같은 구역의 근접 사건이 없습니다. 시간 범위를 넓혀 보세요.`}/>) : (<ul className="max-h-[560px] divide-y divide-line overflow-y-auto">
+          {loading ? (<LoadingState compact/>) : result.clusters.length === 0 ? (<EmptyState title="연관 후보 묶음이 없습니다" message={`현재 조건(±${win}분)에서는 같은 구역의 근접 사건이 없습니다. 시간 범위를 넓혀 보세요.`}/>) : (<ul className="max-h-panel divide-y divide-line overflow-y-auto">
               {result.clusters.slice(0, 50).map((c, i) => {
                 const clusterIds = new Set(c.event_ids);
                 const clusterLinks = result.links.filter((l) => clusterIds.has(l.source));

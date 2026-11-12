@@ -6,6 +6,9 @@ try {
   requireSettings();
   await pool.execute('SELECT 1');
   console.log(`MySQL 연결 성공 (DB: ${process.env.DB_NAME})`);
+  const [tables] = await pool.query('SELECT TABLE_NAME AS name FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()');
+  const missing = ['members', 'incidents', 'analysis_notes', 'analysis_records'].filter((name) => !tables.some((row) => row.name === name));
+  if (missing.length) throw new Error(`테이블이 없습니다: ${missing.join(', ')}. sql/schema.sql 또는 npm run db:init을 실행하세요. (기존 데이터는 유지됩니다)`);
   const server = app.listen(config.port, (error) => {
     if (!error) console.log(`Gotham API: http://localhost:${config.port} (DB: ${process.env.DB_NAME})`);
   });

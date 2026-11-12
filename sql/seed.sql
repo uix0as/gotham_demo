@@ -1,5 +1,5 @@
 -- Workbench: schema.sql을 실행한 같은 기본 스키마에서 전체 실행합니다.
--- 가상 회원 2명 / 가상 훈련 사건 18건만 추가합니다. 실제 개인정보가 아닙니다.
+-- 가상 회원 2명 / 가상 훈련 사건 18건 / 분석 기록 4건만 추가합니다. 실제 개인정보가 아닙니다.
 -- 두 계정의 최초 로그인 비밀번호: demo1234 (공개 시연 전용). 아래는 bcrypt 해시입니다.
 -- 기존 계정·비밀번호·사건을 수정하거나 삭제하지 않습니다. 같은 시드는 중복 삽입하지 않습니다.
 -- 기존 회원이 같은 아이디 또는 이메일을 사용하면 해당 회원을 덮어쓰지 않고 건너뜁니다.
@@ -123,6 +123,35 @@ SELECT '[가상 훈련 18] A-2 강풍 관측','강풍 관측','높음','A-2','�
 FROM members AS m
 WHERE m.username='브라보 분석관' AND m.email='bravo@demo.local'
   AND NOT EXISTS (SELECT 1 FROM incidents AS i WHERE i.author_id=m.id AND i.title='[가상 훈련 18] A-2 강풍 관측');
+
+-- 시연 분석 기록 4건 (analysis_notes). 같은 작성자·제목이 있으면 건너뜁니다.
+INSERT INTO analysis_notes (incident_id,author_id,title,assessment,confidence,content)
+SELECT i.id,m.id,'A-2 통신 장애와 강풍의 시간 근접','주의','보통','통신 장애(14:20) 5분 뒤 같은 구역에서 강풍이 관측됨. 임시 안테나 고정 상태 확인 필요. 인과관계는 확인되지 않음.'
+FROM members AS m INNER JOIN incidents AS i ON i.title='[가상 훈련 02] A-2 강풍 관측'
+WHERE m.username='알파 관제관' AND m.email='alpha@demo.local'
+  AND NOT EXISTS (SELECT 1 FROM analysis_notes AS n WHERE n.author_id=m.id AND n.title='A-2 통신 장애와 강풍의 시간 근접')
+LIMIT 1;
+
+INSERT INTO analysis_notes (incident_id,author_id,title,assessment,confidence,content)
+SELECT i.id,m.id,'중계기 R-07 장애 원인 후보','관찰','낮음','장비 자체 결함과 기상 영향 두 가지 후보. 예비 중계기 전환(15:05) 이후 복구된 점으로 보아 일시적 장애 가능성.'
+FROM members AS m INNER JOIN incidents AS i ON i.title='[가상 훈련 01] A-2 통신 장애'
+WHERE m.username='브라보 분석관' AND m.email='bravo@demo.local'
+  AND NOT EXISTS (SELECT 1 FROM analysis_notes AS n WHERE n.author_id=m.id AND n.title='중계기 R-07 장애 원인 후보')
+LIMIT 1;
+
+INSERT INTO analysis_notes (incident_id,author_id,title,assessment,confidence,content)
+SELECT i.id,m.id,'B-1 발전기 출력 변동 재발 위험','위험','높음','PG-2 출력 변동 후 22분 뒤 점검 착수. 연료 필터 교체 전까지 재발 가능성이 높음. 예비 전원 유지 권고.'
+FROM members AS m INNER JOIN incidents AS i ON i.title='[가상 훈련 03] B-1 전원 이상'
+WHERE m.username='알파 관제관' AND m.email='alpha@demo.local'
+  AND NOT EXISTS (SELECT 1 FROM analysis_notes AS n WHERE n.author_id=m.id AND n.title='B-1 발전기 출력 변동 재발 위험')
+LIMIT 1;
+
+INSERT INTO analysis_notes (incident_id,author_id,title,assessment,confidence,content)
+SELECT i.id,m.id,'B-2 레이더 잡음과 돌풍','주의','보통','RD-2 잡음 증가 8분 뒤 돌풍 관측. 회전부 점검 결과를 받은 뒤 상태 재평가.'
+FROM members AS m INNER JOIN incidents AS i ON i.title='[가상 훈련 12] B-2 레이더 신호 감쇠'
+WHERE m.username='브라보 분석관' AND m.email='bravo@demo.local'
+  AND NOT EXISTS (SELECT 1 FROM analysis_notes AS n WHERE n.author_id=m.id AND n.title='B-2 레이더 잡음과 돌풍')
+LIMIT 1;
 
 COMMIT;
 SELECT id,username,email FROM members WHERE (username='알파 관제관' AND email='alpha@demo.local') OR (username='브라보 분석관' AND email='bravo@demo.local');

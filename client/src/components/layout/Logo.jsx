@@ -1,3 +1,11 @@
-export function Logo() {
-    return <span className="console-logo"><svg width="34" height="34" viewBox="0 0 36 36" aria-hidden="true"><rect width="36" height="36" rx="9" fill="currentColor"/><path d="M10 12h16M10 18h12M10 24h8" fill="none" stroke="var(--brand-mark-ink)" strokeWidth="3" strokeLinecap="round"/></svg><span><strong>Defense Nexus</strong><small>사건·관측 대시보드</small></span></span>;
+/** GOTHAM 표지: 사각 조준선 모양의 자체 제작 마크 (외부 상표와 무관) */
+export function LogoMark({ size = 28 }) {
+    return <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" className="gx-mark">
+      <rect x="1.5" y="1.5" width="29" height="29" rx="3" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M16 5v6M16 21v6M5 16h6M21 16h6" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="12.5" y="12.5" width="7" height="7" fill="var(--accent)"/>
+    </svg>;
+}
+export function Logo({ subtitle = '국방 훈련 정보 분석 시스템' }) {
+    return <span className="gx-logo"><LogoMark /><span><strong>GOTHAM</strong>{subtitle && <small>{subtitle}</small>}</span></span>;
 }

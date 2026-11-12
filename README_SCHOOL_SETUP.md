@@ -58,7 +58,7 @@ USE gotham_20612;
 SHOW TABLES;
 ```
 
-이미 테이블이나 데이터가 있으면 복원을 중단하고 기존 DB를 먼저 별도로 백업합니다. 이번 덤프는 기존 테이블을 DROP하지 않으며, 재실행하면 테이블/기본키 중복 오류가 날 수 있습니다. 이번 경로에서는 schema.sql과 seed.sql을 먼저 실행하지 않습니다.
+이미 테이블이나 데이터가 있으면 복원을 중단하고 기존 DB를 먼저 별도로 백업합니다. 이 백업 파일(`gotham_20612_backup.sql`)은 기존 테이블을 DROP하지 않으며, 재실행하면 테이블/기본키 중복 오류가 날 수 있습니다. 이번 경로에서는 schema.sql과 seed.sql을 먼저 실행하지 않습니다.
 
 3. 상단 **Server → Data Import**를 엽니다.
 4. **Import from Self-Contained File**을 선택하고 압축을 푼 폴더의 `sql/gotham_20612_backup.sql`을 지정합니다.
@@ -83,6 +83,8 @@ ORDER BY i.occurred_at DESC, i.id DESC;
 현재 웹 회원의 비밀번호 해시도 함께 복원되므로 기존 웹 로그인 비밀번호를 그대로 사용합니다. 기본 시연 계정은 alpha@demo.local / demo1234, bravo@demo.local / demo1234입니다. MySQL 접속 비밀번호는 웹 로그인 비밀번호와 별개입니다.
 
 이제 아래6번에서 server/.env를 학교 접속정보로 설정합니다. **5번 시드, db:init·db:seed·data:import는 다시 실행하지 않습니다.**
+
+Workbench의 Data Export(Dump Project Folder)로 만든 테이블별 덤프는 `DROP TABLE IF EXISTS`를 포함하므로 다른 절차가 필요합니다. [WINDOWS_SETUP.md](WINDOWS_SETUP.md) 5단계 방법 B를 따릅니다.
 
 Workbench 절차 참고: [공식 SQL Data Export and Import 안내](https://dev.mysql.com/doc/workbench/en/wb-admin-export-import-management.html). 백업 원본은 MySQL9.0.1에서 내보냈습니다. macOS의 별도 MySQL에 실제 복원하여 세 테이블의 전체 행 내용과 외래키 CASCADE가 원본과 일치하는 것을 확인했습니다. 실제 Windows 복원은 학교에서 확인해야 합니다.
 
@@ -112,7 +114,7 @@ DB_USER=20612
 DB_PASSWORD=학교에서설정한DB비밀번호
 DB_NAME=gotham_20612
 JWT_SECRET=별도로생성한32자이상의무작위비밀키
-CLIENT_ORIGIN=http://localhost:5173,http://127.0.0.1:5173
+CLIENT_ORIGIN=http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://127.0.0.1:4173
 COOKIE_SECURE=false
 ```
 
@@ -195,7 +197,7 @@ npm run build
 
 ## 13. 실제 JOIN과 JavaScript SQL 발표
 
-웹의 **사건·작성자 조회** 메뉴와 아래 SQL을 비교합니다.
+웹의 **전체 사건·작성자**(JOIN 화면 1) 메뉴와 아래 SQL을 비교합니다. **내 사건·회원정보**(JOIN 화면 2)는 같은 JOIN에 `WHERE m.id = ?`(로그인 회원)를 더한 결과입니다.
 
 ```sql
 SELECT i.id AS event_id, i.title, i.status, m.id AS member_id, m.username, m.email
@@ -240,7 +242,7 @@ notepad client/.env.local
 
 ```ini
 VITE_API_BASE_URL=/api
-API_PROXY_TARGET=http://localhost:5001
+API_PROXY_TARGET=http://127.0.0.1:5001
 ```
 
 두 서버를 재시작합니다. 학교 방화벽·권한·실제 Windows 브라우저/네이티브 bcrypt 설치 결과는 학교 PC에서 직접 확인합니다. macOS 재현 성공을 Windows 실측 성공으로 해석하지 않습니다.
