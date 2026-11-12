@@ -14,7 +14,7 @@ export function PageBar({ title, code, description, actions, children }) {
     </header>;
 }
 
-const TONES = { ok: 'is-ok', warn: 'is-warn', danger: 'is-danger', info: 'is-info', accent: 'is-accent', muted: '' };
+const TONES = { ok: 'is-ok', warn: 'is-warn', danger: 'is-danger', 'danger-soft': 'is-danger-soft', info: 'is-info', accent: 'is-accent', muted: '' };
 /** 상태·우선순위 태그: 색 + 기호 + 텍스트로 구분 */
 export function Tag({ tone = 'muted', children, glyph, className }) {
     return <span className={cx('gx-tag', TONES[tone], className)}>{glyph && <i aria-hidden>{glyph}</i>}{children}</span>;
@@ -22,7 +22,7 @@ export function Tag({ tone = 'muted', children, glyph, className }) {
 export function statusTone(status) { return status === '접수' ? 'warn' : status === '검토 중' ? 'info' : 'ok'; }
 export function statusGlyph(status) { return status === '접수' ? '●' : status === '검토 중' ? '◆' : '■'; }
 export function StatusTag({ status }) { return <Tag tone={statusTone(status)} glyph={statusGlyph(status)}>{status}</Tag>; }
-export function severityTone(sev) { return sev === '긴급' ? 'danger' : sev === '높음' ? 'warn' : sev === '보통' ? 'info' : 'muted'; }
+export function severityTone(sev) { return sev === '긴급' ? 'danger' : sev === '높음' ? 'danger-soft' : 'muted'; }
 export function SeverityTag({ severity }) { return <Tag tone={severityTone(severity)} glyph={severity === '긴급' ? '▲▲' : severity === '높음' ? '▲' : severity === '보통' ? '—' : '▽'}>{severity}</Tag>; }
 export function assessmentTone(a) { return a === '위험' ? 'danger' : a === '주의' ? 'warn' : 'info'; }
 export function AssessmentTag({ assessment }) { return <Tag tone={assessmentTone(assessment)} glyph={assessment === '위험' ? '!' : assessment === '주의' ? '△' : '○'}>{assessment}</Tag>; }

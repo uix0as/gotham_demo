@@ -24,7 +24,7 @@ export const STATUS_META = {
     },
     '검토 중': {
         label: '검토 중',
-        color: 'var(--text-muted)',
+        color: 'rgb(var(--info-rgb))',
         text: 'text-info',
         bg: 'bg-info-muted',
         border: 'border-info/40',
