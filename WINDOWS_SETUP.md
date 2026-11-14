@@ -15,6 +15,26 @@
 
 모든 명령은 **Windows PowerShell**에서 실행합니다.
 
+## 0. 빠른 체크리스트 (이미 클론·DB 준비를 해 둔 경우)
+
+프로젝트 폴더(예: `D:\GOTHAM`)에서 PowerShell을 열고 위에서부터 차례로 확인합니다.
+
+| # | 확인 | 명령 / 위치 | 정상 결과 |
+|---|---|---|---|
+| 1 | Node 버전 | `node -v` | `v22.12` 이상 |
+| 2 | MySQL 서비스 | `Get-Service MySQL*` | `Running` |
+| 3 | 최신 코드 | `git pull` | `Already up to date` 또는 갱신 |
+| 4 | 패키지 | `npm.cmd run setup` | `설치 완료` |
+| 5 | `.env` 위치·이름 | `Get-ChildItem server\.env` | `.env` 한 개 (`.env.txt` 아님) |
+| 6 | 테이블 4개 | `npm.cmd run db:init` | `members / incidents / analysis_notes / analysis_records 테이블 준비 완료` |
+| 7 | 시연 데이터(선택) | `npm.cmd run db:seed` | `시연 데이터 준비 완료` |
+| 8 | 연결 진단 | `npm.cmd run diagnose` | `행 수: {...}`와 외래키 `확인` 두 줄 |
+| 9 | 실행 | `npm.cmd run dev` | `MySQL 연결 성공`, `Gotham API: http://localhost:5000`, `Local: http://localhost:5173/` |
+| 10 | 브라우저 | `http://localhost:5173` → 회원가입 | 가입 후 로그인 화면으로 이동 |
+
+- **Mac에서 내보낸 덤프를 복원한 DB는 6번이 꼭 필요합니다.** 덤프에는 `analysis_notes`(분석 기록) 테이블이 없어서, 그대로 두면 서버가 시작하지 않고 회원가입도 실패합니다. `db:init`은 없는 테이블만 만들고 기존 데이터는 지우지 않습니다.
+- 9번에서 Vite 주소만 나오고 `Gotham API` 줄이 없으면 서버가 멈춘 것입니다. 그 위에 출력된 `[사전 점검 실패]` 또는 오류 줄의 해결 방법을 따릅니다. 12절 표도 참고합니다.
+
 ## 1. 사전 준비
 
 | 프로그램 | 필요 버전 | 비고 |

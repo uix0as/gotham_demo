@@ -1,6 +1,6 @@
 import { formatMinutes, minutesBetween, toTime } from '@/utils/date';
 /**
- * 규칙 기반 연관 분석 엔진 (AI 미사용).
+ * 규칙 기반 연관 분석 엔진.
  *
  * 규칙
  *  1. 두 사건의 발생 구역(sector)이 같다.

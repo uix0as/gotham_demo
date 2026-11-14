@@ -81,7 +81,7 @@ export default function Analysis() {
     return (<div className="workspace-page analysis-page">
       <PageHeader code="ANL-COR" title="구역·시간 연관" description="회원 사건과 공개 관측·가상 데이터를 예시 구역과 시간 근접성으로 연결해 연관 후보를 탐색합니다." actions={<span className="app-badge app-sector">
             <Sigma className="h-3.5 w-3.5 text-accent" aria-hidden/>
-            {correlationEngine.label} · AI 미사용
+            {correlationEngine.label} · 규칙 기반 계산
           </span>}/>
 
       <DatasetPanel events={allEvents} value={datasetFilter} onChange={(value) => { setDatasetFilter(value); setTypeFilter(''); setSourceFilter(''); }} status={datasetStatus} error={datasetError} onReload={reloadDataset} type={typeFilter} source={sourceFilter} onType={setTypeFilter} onSource={setSourceFilter}/>

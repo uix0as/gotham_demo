@@ -37,6 +37,11 @@ async function request(method, path, opts = {}) {
     if (res.status === 204)
         return undefined;
     const payload = res.data;
+    // Vite 프록시가 Express에 닿지 못하면 JSON이 아닌 응답(500/502/504, 다른 프로그램의 403 등)이 옵니다.
+    const isApiJson = payload && typeof payload === 'object' && ('data' in payload || 'error' in payload);
+    if (!isApiJson && (res.status >= 500 || res.status === 403 || res.status === 404)) {
+        throw new ApiError(0, 'NETWORK_ERROR', 'API 서버(Express)에 연결할 수 없습니다. 서버 터미널의 오류 메시지(server/.env, MySQL 연결)를 확인한 뒤 npm run dev를 다시 실행하세요.');
+    }
     if (res.status < 200 || res.status >= 300) {
         const body = payload?.error;
         const code = body?.code ?? STATUS_CODE[res.status] ?? 'INTERNAL_ERROR';

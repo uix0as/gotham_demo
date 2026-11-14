@@ -19,6 +19,7 @@
     "db:init": "npm --prefix server run db:init",
     "db:seed": "npm --prefix server run seed",
     "diagnose": "npm --prefix server run diagnose",
+    "preflight": "npm --prefix server run preflight",
     "data:import": "npm --prefix server run data:import --",
     "test": "npm --prefix server test",
     "package": "node scripts/package.mjs"
